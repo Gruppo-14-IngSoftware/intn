@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title><%= locals.title%></title>
+    <meta name="description" content="<%= locals.desc%>">
+    <link rel="stylesheet" href="/stylesheets/style.css">  <!--link diretto, senza le sovracartelle pk è nella cartella public -->
+    <script type="text/javascript" defer src="/javascript/script.js"></script>
+</head>
+<body>
+    <!-- <h1>Main</h1>
+    -->
+    <div class="container">
+        <%- include('../partials/header.ejs')%>
+        <main class="main">
+            <%- body %>
+        </main>
+        <%- include('../partials/footer.ejs')%>
+
+    </div>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+    <script>
+    </script>
+</body>
+</html>

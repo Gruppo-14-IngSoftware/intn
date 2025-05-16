@@ -2,9 +2,12 @@
 const express = require('express');
 const expressLayout = require('express-ejs-layouts');
 const path = require('path');
-const main = require('./server/routes/main');
-
+const main = require('./service/routes/main');
+const connectDB = require('./service/config/db');
 const app = express();
+
+//CONNESSIONE AL DB
+connectDB();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());

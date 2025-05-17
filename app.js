@@ -4,6 +4,7 @@ const expressLayout = require('express-ejs-layouts');
 const path = require('path');
 const main = require('./service/routes/main');
 const connectDB = require('./service/config/db');
+const authRoutes = require('./service/routes/auth');
 const app = express();
 
 //CONNESSIONE AL DB
@@ -19,5 +20,6 @@ app.set('layout', 'layouts/main');
 app.set('view engine', 'ejs');
 
 app.use('/', main);
+app.use('/', authRoutes);
 
 module.exports = app;

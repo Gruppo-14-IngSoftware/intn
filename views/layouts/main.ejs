@@ -11,11 +11,15 @@
     <!-- <h1>Main</h1>
     -->
     <div class="container">
-        <%- include('../partials/header.ejs')%>
+        <% if (typeof showLayoutParts === 'undefined' || showLayoutParts) { %>
+            <%- include('../partials/header') %>
+        <% } %>
         <main class="main">
             <%- body %>
         </main>
-        <%- include('../partials/footer.ejs')%>
+        <% if (typeof showLayoutParts === 'undefined' || showLayoutParts) { %>
+            <%- include('../partials/footer') %>
+        <% } %>
 
     </div>
 

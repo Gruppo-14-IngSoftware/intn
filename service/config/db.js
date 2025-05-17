@@ -1,3 +1,4 @@
+//CONFIGURAZIONE DEL DB
 const mongoose = require('mongoose');
 const connectDB = async () => {
     try{

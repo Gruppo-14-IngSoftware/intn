@@ -4,6 +4,9 @@ require('dotenv').config();
 const express = require('express');
 const expressLayout = require('express-ejs-layouts');
 const path = require('path');
+const main = require('./service/routes/main');
+const connectDB = require('./service/config/db');
+const authRoutes = require('./service/routes/auth');
 const session = require('express-session');
 const passport = require('passport');
 const MongoStore = require('connect-mongo');
@@ -43,10 +46,7 @@ app.use(expressLayout);
 app.set('layout', 'layouts/main');
 app.set('view engine', 'ejs');
 
-//Rotte
-//Rotte main
-app.use('/', require('./service/routes/main'));
-// Rotte auth (login & Google)
-app.use('/auth', require('./service/routes/auth'));
+app.use('/', main);
+app.use('/', authRoutes);
 
 module.exports = app;

@@ -4,7 +4,8 @@ const router = express.Router();
 router.get('', (req, res) => {
     const locals = {
         title : "intn",
-        description : "events webapp"
+        description : "events webapp",
+        showLayoutParts: true
     }
     //res.send('index');
     res.render('index', { locals });

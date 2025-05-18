@@ -1,15 +1,15 @@
 <h2>LOGIN</h2>
 
-<!-- Form for login -->
-<form action="/auth/login" method="POST">
+<form action="/login" method="POST">
     <input type="email" name="email" placeholder="Email">
     <input type="password" name="password" placeholder="Password">
     <button type="submit">Login</button>
 </form>
 
-<a href="/auth/google">GOOGLE</a>
+<a href="/auth/google">
+    <button>Accedi con Google</button>
+</a>
 
-<!-- error alert -->
 <script>
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('error')) {

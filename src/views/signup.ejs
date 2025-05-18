@@ -1,10 +1,9 @@
-<!DOCTYPE html>
-<html>
+
 <head>
     <title>Registrazione</title>
     <link rel="stylesheet" href="/stylesheets/style.css">
 </head>
-<body>
+
 <h1>Registrati</h1>
 
 <% if (error && error.length > 0) { %>
@@ -26,5 +25,16 @@
     <input type="password" name="confirmPassword" placeholder="Conferma password" required><br>
     <button type="submit">Registrati</button>
 </form>
-</body>
-</html>
+
+<a href="/auth/google">
+    <button>Accedi con Google</button>
+</a>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('error')) {
+        alert('Email o password errati. Riprova.');
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+</script>
+

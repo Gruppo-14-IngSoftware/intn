@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-
+//SCHEMA UTENTE
 const userSchema = new mongoose.Schema({
     firstname: {
         type: String,
@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema({
         required: true,
     },
 });
-
+//HASHING DELLA PASSWORD MEDIANTE SALTING, PER NON LASCIARLA IN CHIARO
 userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) return next();
     const salt = await bcrypt.genSalt(10);

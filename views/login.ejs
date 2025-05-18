@@ -1,0 +1,19 @@
+<h2>LOGIN</h2>
+
+<!-- Form for login -->
+<form action="/auth/login" method="POST">
+    <input type="email" name="email" placeholder="Email">
+    <input type="password" name="password" placeholder="Password">
+    <button type="submit">Login</button>
+</form>
+
+<a href="/auth/google">GOOGLE</a>
+
+<!-- error alert -->
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('error')) {
+    alert('Email o password errati. Riprova.');
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+</script>

@@ -14,4 +14,10 @@ router.get('/about', (req, res) =>{
     res.send('about');
 })
 
+//render to login page
+router.get('/login', (req, res) => {
+  res.render('login');
+});
+
+
 module.exports = router;

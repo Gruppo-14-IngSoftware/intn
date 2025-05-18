@@ -24,6 +24,7 @@ const userSchema = new mongoose.Schema({
         type: Date,
         required: true,
     },
+    googleId: String,
     password: {
         type: String,
         required: true,

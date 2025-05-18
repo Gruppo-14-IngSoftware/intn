@@ -1,6 +1,6 @@
-// server.js
+//CONFIGURAZIONE SERVER
 require('dotenv').config();
-const app = require('../app');
+const app = require('../../app');
 const http = require('http');
 
 const port = normalizePort(process.env.PORT || '5000');

@@ -27,6 +27,7 @@ passport.use(new GoogleStrategy({
   if (user) {
     return done(null, user);
   }
+  
   //RICERCA UTENTE
   user = await User.findOne({ email });
   if (user) {

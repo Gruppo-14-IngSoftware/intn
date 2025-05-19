@@ -77,5 +77,14 @@ router.get('auth/google/callback', passport.authenticate('google', {
     failureRedirect: '/login'
 }));
 
+//ROUTING AL LOGOUT
+router.get('/logout', (req, res, next) => {
+  req.logout(function (err) {
+    if (err) return next(err);
+    req.flash('success_msg', 'Logout effettuato con successo!');
+    res.redirect('/login');
+  });
+});
+
 module.exports = router;
 

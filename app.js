@@ -9,6 +9,7 @@ const authRoutes = require('./src/service/routes/auth');
 const session = require('express-session');
 const passport = require('passport');
 const app = express();
+const flash = require('connect-flash');
 
 
 //CONNESSIONE AL DB
@@ -34,9 +35,24 @@ app.use(passport.session());
 
 require('./src/service/config/passport');
 
+//Flash message (error, success)
+app.use(flash());
+// Middleware per rendere i messaggi flash accessibili nei template
+app.use((req, res, next) => {
+  res.locals.success_msg = req.flash('success_msg');
+  res.locals.error_msg = req.flash('error_msg');
+  res.locals.error = req.flash('error'); // messaggio di errore di Passport
+  next();
+});
+
+// Middleware per rendere l'utente disponibile nei template
+app.use((req, res, next) => {
+    res.locals.user = req.user || null;
+    next();
+});
+
 //TEMPLATE PER FRONTEND ENGINE
 app.set('views', path.join(__dirname, 'src', 'views'));
-app.use(expressLayout);
 app.set('layout', 'layouts/main');
 app.set('view engine', 'ejs');
 

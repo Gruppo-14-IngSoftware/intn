@@ -28,7 +28,7 @@ router.post('/signup', async (req, res) => {
     if(password !== confirmPassword) {
         error.push("Le password non coincidono");
     }
-    if(password && password < 8) {
+    if(password && password.length < 8) {
         error.push("La password deve contenere almeno 8 caratteri");
     }
     if(existingMail || existingUser) {
@@ -62,17 +62,22 @@ router.get('/login', (req, res) => {
 });
 
 //ROUTING AL LOGIN POST
-router.post('/login', passport.authenticate('local', {
+router.post('/login',
+  passport.authenticate('local', {
     successRedirect: '/',
-    failureRedirect: '/login?error=1'
-}));
+    failureRedirect: '/login',
+    failureFlash: true,
+    successFlash: 'Login effettuato con successo!'
+  })
+);
+
 
 //ROUTING AL LOGIN GET
 router.get('/auth/google', passport.authenticate('google', {
     scope: ['profile', 'email']
 }));
 
-router.get('auth/google/callback', passport.authenticate('google', {
+router.get('/auth/google/callback', passport.authenticate('google', {
     successRedirect: '/',
     failureRedirect: '/login'
 }));

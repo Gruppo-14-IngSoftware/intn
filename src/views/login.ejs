@@ -1,5 +1,6 @@
 <h2>LOGIN</h2>
 
+<!-- OPZIONI DI LOGIN -->
 <form action="/login" method="POST">
     <input type="email" name="email" placeholder="Email">
     <input type="password" name="password" placeholder="Password">
@@ -10,10 +11,12 @@
     <button>Accedi con Google</button>
 </a>
 
-<script>
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('error')) {
-    alert('Email o password errati. Riprova.');
-    window.history.replaceState({}, document.title, window.location.pathname);
-  }
-</script>
+<!-- success message -->
+<% if (success_msg && success_msg.length > 0) { %>
+  <div class="alert alert-success"><%= success_msg[0] %></div>
+<% } %>
+
+<!-- error message-->
+<% if (error && error.length > 0) { %>
+  <div class="alert alert-danger"><%= error[0] %></div>
+<% } %>

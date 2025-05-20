@@ -71,7 +71,6 @@ router.post('/login',
   })
 );
 
-
 //ROUTING AL LOGIN GET
 router.get('/auth/google', passport.authenticate('google', {
     scope: ['profile', 'email']

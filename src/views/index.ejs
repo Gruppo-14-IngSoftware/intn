@@ -68,30 +68,19 @@
         <span class="visually-hidden">Next</span>
     </button>
 </div>
-<<% events.forEach(event => { %>
-    <a class="containerEvent" href="/event/<%= event.source === 'trento' ? 'trento-' + event.id : event.id %>">
+
+<% data.forEach(event => { %>
+    <div class="containerEvent">
         <div class="event">
-            <img src="<%= event.imageUrl %>" alt="event image">
+            <img src="#" alt="pic1">
             <div class="eventDetails">
-                <h2 class="eventTitle"><%= event.title %></h2>
-                <p class="eventLocation"><%= event.description %></p>
-                <p class="eventDate"><%= event.date.toLocaleDateString('it-IT', {
-                        day: '2-digit', month: 'short', year: 'numeric'
-                    }) %></p>
+                <h2 class="eventTitle"><%= event.title%></h2>
+                <p class="eventLocation"><%= event.description%></p>
             </div>
         </div>
-    </a>
-<% }) %>
-<!--INDICATORE NUMERICO DELLA PAGINA CORRENTE-->
-<div class="pagination">
-    <% if (current > 1) { %>
-        <a href="/?page=<%= current - 1 %>">&lt; Newer events</a>
-    <% } %>
+    </div>
 
-    <% if (nextPage !== null) { %>
-        <a href="/?page=<%= nextPage %>">Older events &gt;</a>
-    <% } %>
-</div>
+<% }) %>
 
 <script src="javascript/bootstrap.bundle.min.js"></script>
 

@@ -66,6 +66,13 @@ router.get('/', async (req, res) => {
     }catch (e) {
         //error page
     }
+
+    try{
+        const data = await Event.find();
+        res.render('index', { locals, data });
+    }catch (e) {
+        //error page
+    }
     //res.send('index');
 });
 

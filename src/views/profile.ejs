@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title><%= title %></title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+    }
+    label {
+      font-weight: bold;
+    }
+    input {
+      margin-bottom: 10px;
+      width: 100%;
+      padding: 8px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px;
+    }
+    .danger {
+      color: white;
+      background-color: red;
+      border: none;
+    }
+  </style>
+
+  <script>
+    function abilitaModifica() {
+      document.querySelectorAll('.editable').forEach(el => el.removeAttribute('disabled'));
+      document.getElementById('salvaBtn').style.display = 'inline';
+      document.getElementById('modificaBtn').style.display = 'none';
+      document.getElementById('passwordSection').style.display = 'block';
+    }
+  </script>
+</head>
+<body>
+  <h1>Profilo Utente</h1>
+
+  <form action="/profile/update" method="POST">
+    <label>Nome:</label>
+    <input type="text" name="firstname" class="editable" value="<%= user.firstname %>" disabled required>
+
+    <label>Cognome:</label>
+    <input type="text" name="lastname" class="editable" value="<%= user.lastname %>" disabled required>
+
+    <label>Email:</label>
+    <input type="email" name="email" class="editable" value="<%= user.email %>" disabled required>
+
+    <label>Username:</label>
+    <input type="text" name="username" class="editable" value="<%= user.username %>" disabled required>
+
+    <label>Data di nascita:</label>
+    <input type="date" value="<%= user.birthdate.toISOString().substring(0, 10) %>" disabled>
+
+    <label>Password (criptata):</label>
+    <input type="password" value="<%= user.password %>" disabled>
+
+    <!-- SEZIONE CAMBIO PASSWORD -->
+    <div id="passwordSection" style="display: none;">
+      <hr>
+      <h3>Cambia password</h3>
+
+      <label>Password attuale:</label>
+      <input type="password" name="currentPassword">
+
+      <label>Nuova password:</label>
+      <input type="password" name="newPassword">
+
+      <label>Conferma nuova password:</label>
+      <input type="password" name="confirmNewPassword">
+    </div>
+
+    <button type="button" id="modificaBtn" onclick="abilitaModifica()">Modifica profilo</button>
+    <button type="submit" id="salvaBtn" style="display: none;">Salva modifiche</button>
+  </form>
+
+  <hr>
+
+  <form action="/logout" method="GET">
+    <button type="submit">Logout</button>
+  </form>
+
+  <hr>
+
+  <form action="/profile/delete" method="POST" onsubmit="return confirm('Sei sicuro di voler eliminare il tuo account? Questa azione è irreversibile.')">
+    <button type="submit" class="danger">Elimina account</button>
+  </form>
+</body>
+</html>

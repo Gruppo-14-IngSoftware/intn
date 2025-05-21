@@ -23,15 +23,18 @@
                 </li>
             </ul>
             <ul class="nav navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="/signup"><span class="fas fa-user"></span> Sign Up</a>
-                </li>
                 <!-- gestisce le pagine di logout e login -->
                 <% if (!user) { %>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/signup"><span class="fas fa-user"></span> Sign Up</a>
+                    </li>
                     <li>
                         <a class="nav-link" href="/login"><span class="fas fa-sign-in-alt"></span> Login</a>
                     </li>
                 <% } else { %>
+                    <li> 
+                        <a class="nav-link" href="/profile">Il mio profilo</a>
+                    </li>
                     <li>
                         <a class="nav-link" href="/logout"><span class="fas fa-sign-in-alt"></span>Logout</a>
                     </li>

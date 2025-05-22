@@ -3,6 +3,7 @@ const express = require('express');
 const expressLayout = require('express-ejs-layouts');
 const path = require('path');
 const main = require('./src/service/routes/main');
+const admin = require('./src/service/routes/admin');
 const connectDB = require('./src/service/config/db');
 const MongoStore = require('connect-mongo');
 const authRoutes = require('./src/service/routes/auth');
@@ -67,6 +68,7 @@ app.set('view engine', 'ejs');
 app.use('/', main);
 app.use('/', authRoutes);
 app.use('/events', eventsRouter);
+app.use('/', admin);
 app.use('/', admin);
 
 // Rotte stats

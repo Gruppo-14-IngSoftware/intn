@@ -70,7 +70,7 @@
 </div>
 
 <% data.forEach(event => { %>
-    <div class="containerEvent">
+    <a class="containerEvent" href="/event/<%= event._id %>">
         <div class="event">
             <img src="#" alt="pic1">
             <div class="eventDetails">
@@ -78,8 +78,7 @@
                 <p class="eventLocation"><%= event.description%></p>
             </div>
         </div>
-    </div>
-
+    </a>
 <% }) %>
 
 <script src="javascript/bootstrap.bundle.min.js"></script>

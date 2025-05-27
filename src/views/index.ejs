@@ -80,6 +80,16 @@
         </div>
     </a>
 <% }) %>
+<!--INDICATORE NUMERICO DELLA PAGINA CORRENTE-->
+<div class="pagination">
+    <% if (current > 1) { %>
+        <a href="/?page=<%= current - 1 %>">&lt; Newer events</a>
+    <% } %>
+
+    <% if (nextPage !== null) { %>
+        <a href="/?page=<%= nextPage %>">Older events &gt;</a>
+    <% } %>
+</div>
 
 <script src="javascript/bootstrap.bundle.min.js"></script>
 

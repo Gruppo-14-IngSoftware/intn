@@ -2,6 +2,37 @@
 const express = require('express');
 const router = express.Router();
 const Event = require('../models/Event');
+//ROUTING CON INDICATORE NUMERO DELLE PAGINE
+router.get('/', async (req, res) => {
+    try{
+        const locals = {
+            title: "intn",
+            description: "events webapp",
+            showLayoutParts: true
+        }
+        let perPage = 10;
+        let page = req.query.page || 1;
+
+        const data = await Event.aggregate([{
+            $sort: {createdAt: -1},
+        }]).skip(perPage * page - perPage).limit(perPage).exec();
+
+        const count = await Event.countDocuments();
+        const nextPage = page + 1;
+        const hasNextPage = nextPage < Math.ceil(count / perPage);
+
+        res.render('index', { locals,
+            data,
+            current: page,
+            nextPage: hasNextPage ? nextPage : null
+        });
+    }catch (e) {
+        //error page
+    }
+    //res.send('index');
+});
+
+/*
 //ROUTING ALLA PAGINA PRINCIPALE CON PASSAGGIO DI VARIABILI
 router.get('', async (req, res) => {
     const locals = {
@@ -18,7 +49,7 @@ router.get('', async (req, res) => {
     }
     //res.send('index');
 });
-/*W
+/*
 function insertEventData(){
     Event.insertMany([{
         title : "Primo evento",

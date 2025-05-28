@@ -1,6 +1,30 @@
 <div class="admin-title">
     <h2>Dashboard</h2>
     <h2>Dashboard</h2>
-    <a href="/add-post" class="button">+ Add New Post</a><br>
-    <a href="/signup" class="button">+ Add New Admin</a>
+    <h2>Dashboard Admin</h2>
+
+    <h3>Utenti</h3>
+    <ul id="userList"></ul>
+
+    <h3>Promuovi utente a admin</h3>
+    <form id="promoteForm">
+        <input type="email" id="promoteEmail" placeholder="Email" required />
+        <button>Promuovi</button>
+    </form>
+
+    <h3>Aggiungi nuovo admin</h3>
+    <form id="addAdminForm">
+        <input type="text" id="newFirst" placeholder="Nome" required />
+        <input type="text" id="newLast" placeholder="Cognome" required />
+        <input type="date" id="newBirth" placeholder="birthdate" required />
+        <input type="text" id="newName" placeholder="Nome" required />
+        <input type="email" id="newEmail" placeholder="Email" required />
+        <input type="password" id="newPass" placeholder="Password" required />
+
+        <button>Aggiungi Admin</button>
+    </form>
+
+    <p id="responseMsg"></p>
+    <script src="/js/admin.js"></script>
+
 </div>

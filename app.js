@@ -61,4 +61,8 @@ app.use('/', main);
 app.use('/', authRoutes);
 app.use('/', admin);
 
+app.get('/admin/dashboard', (req, res) => {
+  res.render('dashboard');
+});
+
 module.exports = app;

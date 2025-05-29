@@ -306,4 +306,29 @@ router.get('/admin/eventAdministrationFull', async (req, res) => {
 
 
 
+//POST ROUTE
+//POST search
+router.post('/search', async (req, res) => {
+    try{
+        const locals = {
+            title : "intn",
+            description : "events webapp",
+            showLayoutParts: true
+        }
+        let searchTerm = req.body.searchTerm;
+        const searchNoSpecialChar = searchTerm.replace(/[^a-zA-Z0-O]/g, ""); //RIMOZIONE CARATTERI SPECIALI
+
+        const data = await Event.find({
+            $or: [
+                {title: {$regex: new RegExp(searchNoSpecialChar, 'i')}},
+                {description: {$regex: new RegExp(searchNoSpecialChar, 'i')}}
+            ]
+        });
+        res.render('search', { locals, data });
+    }catch (e) {
+        //error page
+    }
+    //res.send('index');
+});
+
 module.exports = router;

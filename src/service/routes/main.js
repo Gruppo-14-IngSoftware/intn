@@ -238,9 +238,17 @@ router.delete('/event/:id', isAuthenticated, isEventOwnerOrAdmin, async (req, re
 //POST search
 router.post('/search', async (req, res) => {
     try{
+        let slug = req.params.id;
+        const data = await Event.findById({_id: slug});
+        const options = { day: '2-digit', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+        const formattedDate = new Date(data.date).toLocaleString('it-IT', options);
         const locals = {
-            title : "intn",
-            description : "events webapp",
+            title : data.title,
+            description : data.description,
+            location: data.location,
+            date: formattedDate,
+            tag : data.tag,
+            image : data.imageUrl,
             showLayoutParts: true
         }
         const searchTerm = req.body.searchTerm.toLowerCase();

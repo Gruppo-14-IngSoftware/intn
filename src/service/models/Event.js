@@ -22,6 +22,7 @@ const eventSchema = new schema({
         type:String,
         required: true
     },
+    imageUrl: String,
     createdAt:{
         type:Date,
         default:Date.now

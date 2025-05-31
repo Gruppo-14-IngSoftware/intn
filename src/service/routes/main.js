@@ -70,9 +70,15 @@ router.get('/event/:id', async (req, res) => {
     try{
         let slug = req.params.id;
         const data = await Event.findById({_id: slug});
+        const options = { day: '2-digit', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+        const formattedDate = new Date(data.date).toLocaleString('it-IT', options);
         const locals = {
             title : data.title,
             description : data.description,
+            location: data.location,
+            date: formattedDate,
+            tag : data.tag,
+            image : data.imageUrl,
             showLayoutParts: true
         }
         res.render('event',{locals, data});

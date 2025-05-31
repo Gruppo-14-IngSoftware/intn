@@ -10,6 +10,7 @@ const session = require('express-session');
 const passport = require('passport');
 const app = express();
 const flash = require('connect-flash');
+const { storage } = require('./src/service/utilities/cloudinary');
 
 
 //CONNESSIONE AL DB

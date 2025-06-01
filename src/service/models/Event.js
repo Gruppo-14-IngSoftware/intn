@@ -14,6 +14,13 @@ const eventSchema = new schema({
         type:String,
         required: true,
     },
+    coordinates: {
+        type: {
+            latitude: Number,
+            longitude: Number
+        },
+        default: null
+    },
     date:{
         type:Date,
         required: true,

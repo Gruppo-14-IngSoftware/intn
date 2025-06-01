@@ -81,7 +81,7 @@ router.get('/event/:id', async (req, res) => {
             image : data.imageUrl,
             showLayoutParts: true
         }
-        res.render('event',{locals, data});
+        res.render('event',{locals, data, mapboxToken: process.env.MAPBOX_TOKEN });
     }catch (e) {
         //error page
     }

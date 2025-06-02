@@ -75,8 +75,4 @@ app.use('/', admin);
 app.use('/api/stats', admin);
 
 
-app.get('/admin/dashboard', (req, res) => {
-  res.render('dashboard');
-});
-
 module.exports = app;

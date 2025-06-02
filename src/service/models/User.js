@@ -40,6 +40,11 @@ const userSchema = new mongoose.Schema({
         type: Date, default: Date.now 
     }
     
+    role: {
+        type: String,
+        enum: ['admin', 'user', 'comune', 'locale'],
+        default: 'user',
+    }
 });
 //HASHING DELLA PASSWORD MEDIANTE SALTING, PER NON LASCIARLA IN CHIARO
 userSchema.pre('save', async function (next) {

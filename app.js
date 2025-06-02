@@ -20,6 +20,7 @@ const { storage } = require('./src/service/utilities/cloudinary');
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 const cors = require('cors');
+const eventsRouter = require('./src/service/routes/event');
 
 //CONNESSIONE AL DB
 connectDB();
@@ -70,7 +71,6 @@ app.set('view engine', 'ejs');
 app.use('/', main);
 app.use('/', authRoutes);
 app.use('/events', eventsRouter);
-app.use('/', admin);
 app.use('/', admin);
 
 module.exports = app;

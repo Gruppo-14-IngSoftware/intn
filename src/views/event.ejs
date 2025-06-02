@@ -128,7 +128,9 @@
     <i class="fa-regular fa-bell" title="Iscriviti"></i>
     <i class="fa-regular fa-comment-dots" title="Commenta"></i>
     <i class="fa-solid fa-flag" title="Segnala evento"></i>
-    <i class="fa-solid fa-pen-to-square" title="Modifica evento"></i>
+    <% if (role === 'admin' || role === 'author') { %>
+        <i class="fa-solid fa-pen-to-square" title="Modifica evento"></i>
+    <% } %>
 </div>
 
 <div id="map"></div>

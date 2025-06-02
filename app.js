@@ -11,7 +11,7 @@ const passport = require('passport');
 const app = express();
 const flash = require('connect-flash');
 const { storage } = require('./src/service/utilities/cloudinary');
-
+const eventsRouter = require('./src/service/routes/event');
 
 //CONNESSIONE AL DB
 connectDB();
@@ -49,6 +49,7 @@ app.use((req, res, next) => {
 // Middleware per rendere l'utente disponibile nei template
 app.use((req, res, next) => {
     res.locals.user = req.user || null;
+    res.locals.role = req.user ? req.user.role : null;
     next();
 });
 
@@ -59,5 +60,6 @@ app.set('view engine', 'ejs');
 
 app.use('/', main);
 app.use('/', authRoutes);
+app.use('/events', eventsRouter);
 
 module.exports = app;

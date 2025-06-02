@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
+const User = require('../models/User');
 
 const adminLayout = '../views/layouts/admin';
 
@@ -12,6 +13,12 @@ function isAdmin(req, res, next) {
   req.flash('error_msg', 'Accesso riservato agli amministratori');
   res.redirect('/admin');
 }
+
+// middleware di log
+router.use((req, res, next) => {
+  console.log(`${req.method} ${req.originalUrl}`);
+  next();
+});
 
 // GET login admin
 router.get('/admin', (req, res) => {
@@ -43,7 +50,7 @@ router.get('/logout', (req, res) => {
 
 //DASHBOARD ADMIN
 // 1. GET – visualizza tutti gli utenti
-router.get('/users', async (req, res) => {
+router.get('/admin/users', async (req, res) => {
   try {
     const users = await User.find();
     res.json(users);
@@ -53,24 +60,25 @@ router.get('/users', async (req, res) => {
 });
 
 // 2. POST – cambia ruolo a admin
-router.post('/promote', async (req, res) => {
+router.post('/admin/promote', async (req, res) => {
   const { email } = req.body;
   if (!req.user || req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Accesso negato' });
   }
 
   try {
+    console.log('Richiesta ricevuta con:', req.body);
     const user = await User.findOneAndUpdate({ email }, { role: 'admin' }, { new: true });
     if (!user) return res.status(404).json({ error: 'Utente non trovato' });
-    res.json({ message: `${user.email} promosso a admin.` });
+    res.json({ message: user.email + "promosso admin" });
   } catch (err) {
     res.status(500).json({ error: 'Errore durante la promozione' });
   }
 });
 
 // 3. POST – aggiunge un nuovo utente admin
-router.post('/add', async (req, res) => {
-  const { email, password, name } = req.body;
+router.post('/admin/add', async (req, res) => {
+  const { firstname, lastname, birthdate, username, email, password } = req.body;
 
   if (!req.user || req.user.role !== 'admin') {
     return res.status(403).json({ error: 'Accesso negato' });
@@ -80,7 +88,7 @@ router.post('/add', async (req, res) => {
     const exists = await User.findOne({ email });
     if (exists) return res.status(400).json({ error: 'Utente già esistente' });
 
-    const newUser = await User.create({ email, password, name, role: 'admin' });
+    const newUser = await User.create({firstname, lastname, username, email, birthdate, password, role: 'admin' });
     res.json({ message: `Utente admin ${newUser.email} creato con successo.` });
   } catch (err) {
     res.status(500).json({ error: 'Errore durante la creazione utente' });

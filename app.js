@@ -21,7 +21,7 @@ app.use(express.json());
 
 //CONFIG MIDDLEWARE STATICI (da spostare)
 app.use(expressLayout);
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'src', 'public')));
 
 //CONFIG SESSIONE
 app.use(session({
@@ -60,9 +60,5 @@ app.set('view engine', 'ejs');
 app.use('/', main);
 app.use('/', authRoutes);
 app.use('/', admin);
-
-app.get('/admin/dashboard', (req, res) => {
-  res.render('dashboard');
-});
 
 module.exports = app;

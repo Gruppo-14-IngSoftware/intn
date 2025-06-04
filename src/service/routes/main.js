@@ -1,4 +1,4 @@
-//JS FRONTEND
+//JS ROUTING
 const express = require('express');
 const router = express.Router();
 const Event = require('../models/Event');
@@ -75,7 +75,7 @@ router.get('/about', (req, res) =>{
 router.get('/event/:id', async (req, res) => {
     try{
         const slug = req.params.id;
-        if(slug.startWith("trento-")){
+        if(slug.startsWith("trento-")){
             const trentoId = slug.split("trento-")[1];
             const response = await axios.get(`https://www.comune.trento.it/api/opendata/v2/content/read/${trentoId}`);
 

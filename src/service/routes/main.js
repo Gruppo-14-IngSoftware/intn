@@ -14,21 +14,48 @@ router.get('/', async (req, res) => {
             showLayoutParts: true
         }
         let perPage = 10;
-        let page = req.query.page || 1;
+        let page = parseInt(req.query.page) || 1;
 
-        const data = await Event.aggregate([{
+        const dataDB = await Event.aggregate([{
             $sort: {createdAt: -1},
-        }]).skip(perPage * page - perPage).limit(perPage).exec();
+        }]).skip(perPage * (page - 1)).limit(perPage).exec();
 
         const count = await Event.countDocuments();
-        const nextPage = page + 1;
-        const hasNextPage = nextPage < Math.ceil(count / perPage);
-        const trentoApi = await axios.get('https://www.comune.trento.it/api/opendata/v2/content/search/classes%20%27event%27');
-        const dataComune = trentoApi.data.searchHits;
 
+        const apiTrento = await axios.get('https://www.comune.trento.it/api/opendata/v2/content/search/classes%20%27event%27');
+        const dataAPI = apiTrento.data.searchHits;
+
+        const localsEvent = dataDB.map(e => ({
+            id: e._id,
+            title: e.title,
+            description: e.description,
+            imageUrl: e.imageUrl || '/images/default.jpg',
+            source: 'local',
+            date: new Date(e.date)
+        }));
+
+        const TrentoEvents = dataAPI.map(e => {
+            const dateStr = e.metadata.published || e.metadata.modified || null;
+            return {
+                id: e.metadata.id,
+                title: e.metadata.name?.['ita-IT'] || 'Evento Comune di Trento',
+                description: e.metadata.description?.['ita-IT']?.substring(0, 100) || 'Descrizione non disponibile',
+                imageUrl: '/images/comune-trento.jpg',
+                source: 'trento',
+                date: dateStr ? new Date(dateStr) : new Date(0)
+            };
+        });
+
+        const allEvents = [...localsEvent, ...TrentoEvents];
+        allEvents.sort((a, b) => b.date - a.date);
+
+        const totalCount = count + TrentoEvents.length;
+        const nextPage = page + 1;
+        const hasNextPage = nextPage <= Math.ceil(totalCount / perPage);
+
+        const paginatedEvents = allEvents.slice((page - 1) * perPage, page * perPage);
         res.render('index', { locals,
-            data,
-            dataComune,
+            events: paginatedEvents,
             current: page,
             nextPage: hasNextPage ? nextPage : null
         });

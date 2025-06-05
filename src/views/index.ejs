@@ -68,24 +68,16 @@
         <span class="visually-hidden">Next</span>
     </button>
 </div>
-<% dataComune.forEach(eventComune => { %>
-    <a class="containerEvent" href="/event/trento-<%= eventComune.metadata.id %>">
+<<% events.forEach(event => { %>
+    <a class="containerEvent" href="/event/<%= event.source === 'trento' ? 'trento-' + event.id : event.id %>">
         <div class="event">
-            <img src="<%= eventComune.metadata.image_url || '/images/default.jpg' %>" alt="event image">
+            <img src="<%= event.imageUrl %>" alt="event image">
             <div class="eventDetails">
-                <h2 class="eventTitle"><%= eventComune.metadata.name['ita-IT']%></h2>
-                <p class="eventLocation"><%= eventComune.metadata.description?.['ita-IT']?.substring(0, 100) || 'Descrizione non disponibile'%></p>
-            </div>
-        </div>
-    </a>
-<% }) %>
-<% data.forEach(event => { %>
-    <a class="containerEvent" href="/event/<%= event._id %>">
-        <div class="event">
-            <img src="<%= event.imageUrl %>" alt="pic1">
-            <div class="eventDetails">
-                <h2 class="eventTitle"><%= event.title%></h2>
-                <p class="eventLocation"><%= event.description%></p>
+                <h2 class="eventTitle"><%= event.title %></h2>
+                <p class="eventLocation"><%= event.description %></p>
+                <p class="eventDate"><%= event.date.toLocaleDateString('it-IT', {
+                        day: '2-digit', month: 'short', year: 'numeric'
+                    }) %></p>
             </div>
         </div>
     </a>

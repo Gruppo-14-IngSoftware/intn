@@ -156,16 +156,42 @@ router.post('/search', async (req, res) => {
             description : "events webapp",
             showLayoutParts: true
         }
-        let searchTerm = req.body.searchTerm;
-        const searchNoSpecialChar = searchTerm.replace(/[^a-zA-Z0-O]/g, ""); //RIMOZIONE CARATTERI SPECIALI
+        const searchTerm = req.body.searchTerm.toLowerCase();
+        const searchNoSpecialChar = searchTerm.replace(/[^a-zA-Z0-9\s]/g, ""); //RIMOZIONE CARATTERI SPECIALI
 
-        const data = await Event.find({
+        const dataDB = await Event.find({
             $or: [
                 {title: {$regex: new RegExp(searchNoSpecialChar, 'i')}},
                 {description: {$regex: new RegExp(searchNoSpecialChar, 'i')}}
             ]
         });
-        res.render('search', { locals, data });
+
+        const axios = require('axios');
+        const dataAPI = await axios.get('https://www.comune.trento.it/api/opendata/v2/content/search', {
+            params: {
+                classes: 'event'
+            }
+        });
+        const dataTrentoRaw = dataAPI.data.searchHits || [];
+
+        const dataTrento = dataTrentoRaw
+            .filter(hit => {
+                const title = hit.metadata.name?.['ita-IT']?.toLowerCase() || '';
+                const description = hit.metadata.description?.['ita-IT']?.toLowerCase() || '';
+                return title.includes(searchTerm) || description.includes(searchTerm);
+            })
+            .map(hit => ({
+                _id: `trento-${hit.metadata.id}`,
+                title: hit.metadata.name?.['ita-IT'] || 'Evento',
+                description: hit.metadata.description?.['ita-IT'] || 'Nessuna descrizione disponibile',
+                imageUrl: '/images/default.jpg',
+                location: hit.metadata.location?.['ita-IT'] || 'Trento',
+                externalLink: hit.metadata.link
+            }));
+
+        const allEvents = [...dataDB, ...dataTrento];
+
+        res.render('search', { locals, data: allEvents});
     }catch (e) {
         //error page
     }

@@ -1,5 +1,5 @@
 <div class="admin-title">
-    <h2>Dashboard</h2>
+    <h4>Dashboard</h4>
     <h1>Dashboard Admin</h1>
 
     <!-- CHARTS OF STATISTICS -->
@@ -153,37 +153,43 @@
       loadUserTrend();
     </script>
 
-    <h3>Utenti</h3>
-    <ul id="userList"></ul>
 
-    <h3>Promuovi utente a admin</h3>
-    <form id="promoteForm">
-        <input type="email" id="promoteEmail" placeholder="Email" required />
-        <button>Promuovi</button>
-    </form>
+    <h2>Utenti</h2>
+    <!-- form per aggiungere nuovi admin -->
+    <!-- LINK PER APRIRE IL FORM -->
+    <a id="toggleAddAdmin">+ Aggiungi nuovo admin</a>
 
-    <h3>Aggiungi nuovo admin</h3>
-    <form id="addAdminForm">
-        <input type="text" id="newFirst" placeholder="Nome" required />
-        <input type="text" id="newLast" placeholder="Cognome" required />
-        <input type="date" id="newBirth" placeholder="birthdate" required />
-        <input type="text" id="newUser" placeholder="Username" required />
-        <input type="email" id="newEmail" placeholder="Email" required />
-        <input type="password" id="newPass" placeholder="Password" required />
+    <!-- CONTENITORE NASCOSTO -->
+    <div id="addAdminContainer" style="display: none; margin-top: 10px;">
+      <form id="addAdminForm">
+          <input type="text" id="newFirst" placeholder="Nome" required />
+          <input type="text" id="newLast" placeholder="Cognome" required />
+          <input type="date" id="newBirth" placeholder="Data di nascita" required />
+          <input type="text" id="newUser" placeholder="Username" required />
+          <input type="email" id="newEmail" placeholder="Email" required />
+          <input type="password" id="newPass" placeholder="Password" required />
+          <button type="submit">Aggiungi Admin</button>
+      </form>
+      <p id="responseMsg"></p>
+    </div>
 
-        <button>Aggiungi Admin</button>
-    </form>
+    <table>
+      <thead>
+          <tr>
+            <th>USERNAME</th>
+            <th>EMAIL</th>
+            <th>ROLE</th>
+            <th>PROMOTE</th>
+          </tr>
+      </thead>
 
-    <p id="responseMsg"></p>
+      <tbody id="userList">
+
+      </tbody>
+    </table>
+
+    
     <script src="/javascript/admin.js"></script>
 
 </div>
 
-<!-- aggiungere controllo succes_msg è scritto -->
-<% if (success_msg) { %>
-  <div class="alert alert-success"><%= success_msg %></div>
-<% } %>
-
-<% if (error_msg) { %>
-  <div class="alert alert-danger"><%= error_msg %></div>
-<% } %>

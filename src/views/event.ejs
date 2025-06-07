@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html lang="it">
 <head>
     <meta charset="UTF-8">
@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="../public/stylesheets/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-Mz0p...=="
           crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
     <style>
         body {
@@ -83,13 +84,26 @@
             border-radius: 10px;
             margin-bottom: 1rem;
         }
+        .eventGallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .eventGallery img {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
 <script>
     mapboxgl.accessToken = "<%= mapboxToken %>";
 
-    const position = "Via Roma 10, 10123 Torino, Italia";
+    const position = "<%= locals.location %>";
 
     fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(position)}.json?access_token=${mapboxgl.accessToken}`)
         .then(res => res.json())
@@ -114,23 +128,73 @@
         });
 </script>
 <body>
-<img src="<%= locals.image %>" alt="Immagine evento" class="eventImage">
-
+<% if (Array.isArray(locals.images) && locals.images.length > 0) { %>
+    <div id="eventCarousel" class="carousel slide mb-3" data-bs-ride="carousel">
+        <div class="carousel-inner" style="border-radius: 10px; overflow: hidden;">
+            <% locals.images.forEach(function(img, index) { %>
+                <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                    <img src="<%= img %>" class="d-block w-100 eventImage" alt="Immagine evento <%= index + 1 %>">
+                </div>
+            <% }) %>
+        </div>
+        <% if (locals.images.length > 1) { %>
+            <button class="carousel-control-prev" type="button" data-bs-target="#eventCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Precedente</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#eventCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Successivo</span>
+            </button>
+        <% } %>
+    </div>
+<% } else { %>
+    <img src="<%= locals.image || '/images/default.jpg' %>" alt="Immagine evento" class="eventImage">
+<% } %>
 <div class="eventTitle"><%= locals.title %></div>
+<% if (locals.tag) { %>
+    <div class="mb-3">
+        <span class="badge bg-primary"><%= locals.tag %></span>
+    </div>
+<% } %>
 
 <div class="eventDetails">
     <p><strong>Data:</strong> <%= locals.date %></p>
     <p><strong>Luogo:</strong> <%= locals.location %></p>
     <p><%= locals.description %></p>
 </div>
+<% if (user) { %>
+    <form action="/event/<%= data._id %>/subscribe" method="POST">
+        <button class="btn btn-primary btn-lg" type="submit">
+            <i class="fa-solid fa-bell"></i> Iscriviti
+        </button>
+    </form>
+<% } else { %>
+    <p><a href="/login">Accedi</a> per iscriverti a questo evento.</p>
+<% } %>
+
 
 <div class="eventBox">
-    <i class="fa-regular fa-bell" title="Iscriviti"></i>
-    <i class="fa-regular fa-comment-dots" title="Commenta"></i>
+    <div class="mb-4">
+        <i class="fa-solid fa-share-nodes me-2" onclick="toggleShareMenu()"></i>
+        <div id="shareMenu" style="display: none; padding-top: 10px;">
+            <input type="text" readonly class="form-control mb-2" value="<%= '' + locals._id %>">
+
+            <div class="d-flex justify-content-around">
+                <a href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent('' + locals._id) %>" target="_blank" class="btn btn-primary">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                <a href="https://twitter.com/intent/tweet?url=<%= encodeURIComponent('' + locals._id) %>" target="_blank" class="btn btn-info text-white">
+                    <i class="fab fa-x-twitter"></i>
+                </a>
+                <a href="mailto:?subject=Evento: <%= encodeURIComponent(locals.title) %>&body=Guarda questo evento: <%= locals._id %>" class="btn btn-danger">
+                    <i class="fas fa-envelope"></i>
+                </a>
+            </div>
+        </div>
+    </div>
     <i class="fa-solid fa-flag" title="Segnala evento"></i>
-    <% if (role === 'admin' || role === 'author') { %>
-        <i class="fa-solid fa-pen-to-square" title="Modifica evento"></i>
-    <% } %>
+    <i class="fa-solid fa-pen-to-square" title="Modifica evento"></i>
 </div>
 
 <div id="map"></div>
@@ -155,5 +219,13 @@
         <p>Nessun commento ancora.</p>
     <% } %>
 </div>
+<script>
+    function toggleShareMenu() {
+        const menu = document.getElementById('shareMenu');
+        menu.style.display = (menu.style.display === 'none') ? 'block' : 'none';
+    }
+</script>
+
 </body>
 </html>
+

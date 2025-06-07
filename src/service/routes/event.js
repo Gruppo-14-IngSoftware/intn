@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
+const path = require('path');
 const axios = require('axios');
 const cloudinary = require('cloudinary').v2;
 
@@ -13,44 +14,49 @@ cloudinary.config({
 });
 
 router.get('/create', (req, res) => {
-    res.render('create', {
+    res.render('create/privateCreate', {
         mapboxToken: process.env.MAPBOX_TOKEN,
         showLayoutParts: true
     });
 });
 
-router.post('/create', upload.single('image'), async (req, res) => {
+router.post('/create', upload.array('image', 5), async (req, res) => {
     try {
-        const { title, description, location, date, tag } = req.body;
-        const geoRes = await axios.get('https://api.mapbox.com/geocoding/v5/mapbox.places/' + encodeURIComponent(location) + '.json', {
+        const { DateTime } = require('luxon');
+        const { title, description, street, city, province, country, date, tag } = req.body;
+        const fullAddress = `${street}, ${city}, ${province}, ${country}`;
+        const geoRes = await axios.get('https://api.mapbox.com/geocoding/v5/mapbox.places/' + encodeURIComponent(fullAddress) + '.json', {
             params: {
                 access_token: process.env.MAPBOX_TOKEN,
-                proximity: '7.6869,45.0703'
+                limit:1,
+                autocomplete: false
             }
         });
         const coords = geoRes.data.features[0]?.center || [null, null];
-
-        let imageUrl = '';
-        if (req.file) {
-            const uploadRes = await cloudinary.uploader.upload(req.file.path);
-            imageUrl = uploadRes.secure_url;
+        const parsedDate = DateTime.fromISO(date, { zone: 'Europe/Rome' }).toUTC().toJSDate();
+        let imageUrls = [];
+        if (req.files && req.files.length > 0) {
+            const uploadPromises = req.files.map(file => cloudinary.uploader.upload(file.path));
+            const uploadResults = await Promise.all(uploadPromises);
+            imageUrls = uploadResults.map(result => result.secure_url);
         }
         const newEvent = new Event({
             title,
             description,
-            location,
-            coordinates: { lat: coords[1], lng: coords[0] },
-            date,
+            location: fullAddress,
+            coordinates: { latitude: coords[1], longitude: coords[0] },
+            date: parsedDate,
             tag,
-            imageUrl
+            images: imageUrls
         });
         await newEvent.save();
         res.redirect('/event/' + newEvent._id);
+        console.log('GEOCODING:', geoRes.data.features[0]);
+        console.log("FILES RICEVUTI:", req.files);
     } catch (err) {
         console.error('Errore creazione evento:', err);
         res.status(500).send('Errore nella creazione evento');
         console.log('Cloudinary config:', process.env.CLOUD_NAME, process.env.CLOUD_API_KEY);
-
     }
 });
 module.exports = router;

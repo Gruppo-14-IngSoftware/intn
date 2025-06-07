@@ -25,11 +25,11 @@ router.get('/', async (req, res) => {
         const apiTrento = await axios.get('https://www.comune.trento.it/api/opendata/v2/content/search/classes%20%27event%27');
         const dataAPI = apiTrento.data.searchHits;
 
-        const localsEvent = dataDB.map(e => ({
+        const privateEvents = dataDB.map(e => ({
             id: e._id,
             title: e.title,
             description: e.description,
-            imageUrl: e.imageUrl || '/images/default.jpg',
+            images: e.images && e.images.length ? e.images : [e.imageUrl],
             source: 'local',
             date: new Date(e.date)
         }));
@@ -40,13 +40,13 @@ router.get('/', async (req, res) => {
                 id: e.metadata.id,
                 title: e.metadata.name?.['ita-IT'] || 'Evento Comune di Trento',
                 description: e.metadata.description?.['ita-IT']?.substring(0, 100) || 'Descrizione non disponibile',
-                imageUrl: '/images/comune-trento.jpg',
+                images: e.images,
                 source: 'trento',
                 date: dateStr ? new Date(dateStr) : new Date(0)
             };
         });
 
-        const allEvents = [...localsEvent, ...TrentoEvents];
+        const allEvents = [...privateEvents, ...TrentoEvents];
         allEvents.sort((a, b) => b.date - a.date);
 
         const totalCount = count + TrentoEvents.length;
@@ -65,44 +65,16 @@ router.get('/', async (req, res) => {
     //res.send('index');
 });
 
-/*
-//ROUTING ALLA PAGINA PRINCIPALE CON PASSAGGIO DI VARIABILI
-router.get('', async (req, res) => {
-    const locals = {
-        title : "intn",
-        description : "events webapp",
-        showLayoutParts: true
-    }
-
-    try{
-        const data = await Event.find();
-        res.render('index', { locals, data });
-    }catch (e) {
-        //error page
-    }
-    //res.send('index');
-});
-/*
-function insertEventData(){
-    Event.insertMany([{
-        title : "Primo evento",
-        description : "evento test",
-        location : "trento",
-        date : Date.now(),
-        tag : "scuola",
-    },
-    ])
-}
-*/
 router.get('/about', (req, res) =>{
     res.send('about');
 });
 
 //EVENT PAGE ROUTING DA RENDERE PIù OTTIMIZZATA!!!!
 router.get('/event/:id', async (req, res) => {
-    try{
+    try {
         const slug = req.params.id;
-        if(slug.startsWith("trento-")){
+        const { DateTime } = require('luxon');
+        if (slug.startsWith("trento-")) {
             const trentoId = slug.split("trento-")[1];
             const response = await axios.get(`https://www.comune.trento.it/api/opendata/v2/content/read/${trentoId}`);
 
@@ -111,40 +83,43 @@ router.get('/event/:id', async (req, res) => {
             const description = event.metadata.description?.["ita-IT"] || "Nessuna descrizione disponibile";
             const location = event.metadata.address?.["ita-IT"] || "Trento";
             const date = event.metadata.published;
-            const formattedDate = new Date(date).toLocaleString('it-IT', {
-                day: '2-digit', month: '2-digit', year: 'numeric',
-                hour: '2-digit', minute: '2-digit'
-            });
+            const formattedDate = DateTime.fromISO(date, { zone: 'utc' })
+                .setZone('Europe/Rome')
+                .toFormat("dd/MM/yyyy HH:mm");
             const image = event.metadata.image_url || "";
+            const images = image ? [image]: [];
             const locals = {
                 title,
                 description,
                 location,
                 date: formattedDate,
                 tag: "Comune di Trento",
-                image,
+                images,
                 showLayoutParts: true
             };
             return res.render('event', { locals, data: null, mapboxToken: process.env.MAPBOX_TOKEN });
-        }else {
+        } else {
             const data = await Event.findById(slug);
-            const options = {day: '2-digit', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'};
-            const formattedDate = new Date(data.date).toLocaleString('it-IT', options);
+            const options = { day: '2-digit', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+            const formattedDate = DateTime
+                .fromJSDate(data.date, { zone: 'utc' })
+                .setZone('Europe/Rome')
+                .toFormat("dd/MM/yyyy HH:mm");
             const locals = {
                 title: data.title,
                 description: data.description,
                 location: data.location,
                 date: formattedDate,
                 tag: data.tag,
-                image: data.imageUrl,
+                images: data.images && data.images.length ? data.images : [data.imageUrl],
                 showLayoutParts: true
             };
-            res.render('event', {locals, data, mapboxToken: process.env.MAPBOX_TOKEN});
+            return res.render('event', { locals, data, user: req.user, mapboxToken: process.env.MAPBOX_TOKEN });
         }
-    }catch (e) {
-        //error page
+    } catch (e) {
+        console.error("Errore nella visualizzazione evento:", e.message);
+        res.status(404).render('404', { showLayoutParts: true });
     }
-    //res.send('index');
 });
 
 //POST ROUTE

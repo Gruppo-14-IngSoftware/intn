@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const passport = require('passport');
 const User = require('../models/User');
+const statsController = require('../controllers/statsController');
 
 const adminLayout = '../views/layouts/admin';
 
@@ -49,6 +50,39 @@ router.get('/logout', (req, res) => {
 });
 
 //DASHBOARD ADMIN
+
+// 0. GET - visualizza grafici utenti
+
+router.get('/overview', statsController.getOverview);
+router.get('/users/trend', statsController.getUserTrend);
+router.get('/users/active', statsController.getActiveUsers);
+
+
+router.get('/users-by-month', async (req, res) => {
+  try {
+    const result = await User.aggregate([
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } },
+      {
+        $project: {
+          _id: 0,
+          month: '$_id',
+          count: 1
+        }
+      }
+    ]);
+    res.json(result);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Errore durante il recupero dei dati' });
+  }
+});
+
 // 1. GET – visualizza tutti gli utenti
 router.get('/admin/users', async (req, res) => {
   try {
@@ -67,11 +101,11 @@ router.post('/admin/promote', async (req, res) => {
   }
 
   try {
-    console.log('Richiesta ricevuta con:', req.body);
     const user = await User.findOneAndUpdate({ email }, { role: 'admin' }, { new: true });
     if (!user) return res.status(404).json({ error: 'Utente non trovato' });
     res.json({ message: user.email + "promosso admin" });
   } catch (err) {
+    console.error('error message:', err.message, err.stack);
     res.status(500).json({ error: 'Errore durante la promozione' });
   }
 });
@@ -91,6 +125,7 @@ router.post('/admin/add', async (req, res) => {
     const newUser = await User.create({firstname, lastname, username, email, birthdate, password, role: 'admin' });
     res.json({ message: `Utente admin ${newUser.email} creato con successo.` });
   } catch (err) {
+    console.error('error message:', err.message, err.stack);
     res.status(500).json({ error: 'Errore durante la creazione utente' });
   }
 });

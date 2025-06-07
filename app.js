@@ -18,6 +18,7 @@ const admin = require('./src/service/routes/admin');
 const cors = require('cors');
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
+const cors = require('cors');
 
 //CONNESSIONE AL DB
 connectDB();
@@ -70,9 +71,5 @@ app.use('/', authRoutes);
 app.use('/events', eventsRouter);
 app.use('/', admin);
 app.use('/', admin);
-
-// Rotte stats
-app.use('/api/stats', admin);
-
 
 module.exports = app;

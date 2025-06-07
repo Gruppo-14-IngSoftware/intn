@@ -11,6 +11,7 @@ const session = require('express-session');
 const passport = require('passport');
 const app = express();
 const flash = require('connect-flash');
+const cors = require('cors');
 
 
 //CONNESSIONE AL DB
@@ -18,6 +19,7 @@ connectDB();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(cors());
 
 //CONFIG MIDDLEWARE STATICI (da spostare)
 app.use(expressLayout);
@@ -60,5 +62,8 @@ app.set('view engine', 'ejs');
 app.use('/', main);
 app.use('/', authRoutes);
 app.use('/', admin);
+
+// Rotte stats
+app.use('/api/stats', admin);
 
 module.exports = app;

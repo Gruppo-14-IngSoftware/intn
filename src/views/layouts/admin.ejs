@@ -6,6 +6,49 @@
     <meta name="description" content="<%= locals.desc%>">
     <link rel="stylesheet" href="/stylesheets/style.css">  <!--link diretto, senza le sovracartelle pk è nella cartella public -->
     <script type="text/javascript" defer src="/javascript/script.js"></script>
+
+    <!-- charts of the statistics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .dashboard-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;       
+        }
+
+        .dashboard-row section {
+            flex: 1 1 48%; 
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            background: #fff;
+        }
+
+        body {
+            font-family: sans-serif;
+            padding: 2rem;
+        }
+
+        canvas {
+            display: block;
+            width: 50% !important;
+            height: auto !important;
+        }
+
+        .chart-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto 2rem auto;
+            justify-content: center; 
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-row section {
+            flex: 1 1 100%;
+            }
+        }
+    </style>
+
 </head>
 <body>
     <!-- <h1>Main</h1>

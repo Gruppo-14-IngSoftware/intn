@@ -1,10 +1,11 @@
 const LocalStrategy = require('passport-local').Strategy;
-const GoogleStrategy = require('passport-google-oauth20').Strategy
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const bcrypt = require('bcrypt');
 const passport = require('passport');
+const mongoose = require('mongoose');
 const User = require('../models/User');
 
-//LOGIN IN IN LOCALE, SENZA GOOGLE
+// Strategia login locale
 passport.use(new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
   try {
     const user = await User.findOne({ email });
@@ -16,43 +17,44 @@ passport.use(new LocalStrategy({ usernameField: 'email' }, async (email, passwor
     return done(err);
   }
 }));
-//LOGIN TRAMITE GOOGLE CON CONNESSIONE DI ACCOUNT SE ESISTE GIà
+
+// Strategia login con Google
 passport.use(new GoogleStrategy({
-  clientID: 'GOOGLE_CLIENT_ID',
-  clientSecret: 'GOOGLE_CLIENT_SECRET',
-  callbackURL: '/auth/google/callback'
-}, async (accessToken, refreshToken, Profiler, done) => {
-  const email = Profiler.emails[0].value;
-  let user = await User.findOne({ googleId: Profiler.id });
-  if (user) {
+  clientID: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL: 'http://localhost:5000/auth/google/callback'
+}, async (accessToken, refreshToken, profile, done) => {
+  try {
+    const email = profile.emails[0].value;
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      // Non registrato: rifiuta l'accesso
+      return done(null, false, { message: 'Utente non registrato' });
+    }
+
+    // Collega Google ID se non già presente
+    if (!user.googleId) {
+      user.googleId = profile.id;
+      await user.save();
+    }
+
     return done(null, user);
+  } catch (err) {
+    return done(err);
   }
-  
-  //RICERCA UTENTE
-  user = await User.findOne({ email });
-  if (user) {
-    user.googleId = profile.id;
-    await user.save();
-    return done(null, user);
-  }
-  user = await User.create({
-    username: profile.displayName,
-    email,
-    googleId: profile.id
-  });
-  return done(null, user);
 }));
 
-//SERIALIZZAZIONE UTENTE PER SALVARE L'ID
+
+// Serializzazione e deserializzazione utente
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });
 
-//DESERIALIZZAZIONE UTENTE PER OTTENERE L'ID SALVATO NELLA SESSIONE
 passport.deserializeUser(async (id, done) => {
   try {
     const user = await User.findById(id);
-    done(null, user); // salva tutto l’oggetto user in req.user
+    done(null, user);
   } catch (err) {
     done(err);
   }

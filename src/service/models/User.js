@@ -29,6 +29,16 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    role: {
+        type: String, 
+        enum: ['user', 'company', 'admin'],
+        default: 'user'
+    },
+
+    createdAt: { 
+        type: Date, default: Date.now 
+    }
+    
 });
 //HASHING DELLA PASSWORD MEDIANTE SALTING, PER NON LASCIARLA IN CHIARO
 userSchema.pre('save', async function (next) {

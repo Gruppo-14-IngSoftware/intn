@@ -3,6 +3,7 @@ const express = require('express');
 const expressLayout = require('express-ejs-layouts');
 const path = require('path');
 const main = require('./src/service/routes/main');
+const admin = require('./src/service/routes/admin');
 const connectDB = require('./src/service/config/db');
 const MongoStore = require('connect-mongo');
 const authRoutes = require('./src/service/routes/auth');
@@ -10,6 +11,7 @@ const session = require('express-session');
 const passport = require('passport');
 const app = express();
 const flash = require('connect-flash');
+const cors = require('cors');
 
 
 //CONNESSIONE AL DB
@@ -17,10 +19,11 @@ connectDB();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(cors());
 
 //CONFIG MIDDLEWARE STATICI (da spostare)
 app.use(expressLayout);
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'src', 'public')));
 
 //CONFIG SESSIONE
 app.use(session({
@@ -58,5 +61,9 @@ app.set('view engine', 'ejs');
 
 app.use('/', main);
 app.use('/', authRoutes);
+app.use('/', admin);
+
+// Rotte stats
+app.use('/api/stats', admin);
 
 module.exports = app;

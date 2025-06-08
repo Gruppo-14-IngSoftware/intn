@@ -1,0 +1,195 @@
+<div class="admin-title">
+    <h4>Dashboard</h4>
+    <h1>Dashboard Admin</h1>
+
+    <!-- CHARTS OF STATISTICS -->
+    <div class="dashboard-row">
+    <section>
+      <h4>Panoramica</h4>
+      <p><strong>Utenti totali:</strong> <span id="totalUsers">...</span></p>
+    </section>
+
+    <section>
+      <h4>Andamento nuovi utenti (ultimi 7 giorni)</h4>
+      <div class="chart-container">
+        <canvas id="userTrendChart"></canvas>
+      </div>
+    </section>
+
+    <section>
+      <h4>Distribuzione utenti (ultimi 7 giorni vs altri)</h4>
+      <div class="chart-container">
+        <canvas id="userPieChart"></canvas>
+      </div>
+    </section>
+
+    <section>
+      <h4>Utenti attivi vs totali</h4>
+      <div class="chart-container">
+        <canvas id="activeUsersPie"></canvas>
+      </div>
+    </section>
+  </div>
+
+    <script>
+      console.log("Script caricato correttamente");
+
+      async function loadOverview() {
+        try {
+          const res = await fetch('/api/stats/overview');
+          const data = await res.json();
+          console.log("Panoramica:", data);
+          document.getElementById('totalUsers').textContent = data.totalUsers;
+        } catch (error) {
+          console.error("Errore overview:", error);
+        }
+      }
+
+      async function loadUserTrend() {
+        try {
+          // Fetch trend utenti
+          const trendRes = await fetch('/api/stats/users/trend');
+          const trendData = await trendRes.json();
+
+          const labels = trendData.map(d => d._id);
+          const counts = trendData.map(d => d.count);
+          const recentTotal = counts.reduce((a, b) => a + b, 0);
+
+          // Grafico andamento utenti
+          new Chart(document.getElementById('userTrendChart'), {
+            type: 'bar',
+            data: {
+              labels,
+              datasets: [{
+                label: 'Nuovi utenti (ultimi 7 giorni)',
+                data: counts,
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              responsive: true,
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  suggestedMax: Math.max(...counts, 1) + 2,
+                  ticks: {
+                    stepSize: 1,
+                    precision: 0
+                  }
+                }
+              }
+            }
+          });
+
+          // Fetch overview per utenti totali
+          const totalRes = await fetch('/api/stats/overview');
+          const totalData = await totalRes.json();
+          const totalUsers = totalData.totalUsers;
+          const olderUsers = Math.max(totalUsers - recentTotal, 0);
+
+          // Grafico a torta utenti recenti vs precedenti
+          new Chart(document.getElementById('userPieChart'), {
+            type: 'pie',
+            data: {
+              labels: ['Ultimi 7 giorni', 'Precedenti'],
+              datasets: [{
+                data: [recentTotal, olderUsers],
+                backgroundColor: ['#36A2EB', '#FFCE56']
+              }]
+            },
+            options: {
+              responsive: true,
+              layout: {
+                padding: 0
+              },
+              plugins: {
+                legend: {
+                  position: 'bottom',
+                  labels: {
+                    padding: 10
+                  }
+                }
+              }
+            }
+          });
+
+          // Fetch utenti attivi
+          const activeRes = await fetch('/api/stats/users/active');
+          const activeData = await activeRes.json();
+          const active = activeData.activeUsers;
+          const inactive = activeData.totalUsers - active;
+
+          // Grafico utenti attivi vs non attivi
+          new Chart(document.getElementById('activeUsersPie'), {
+            type: 'pie',
+            data: {
+              labels: ['Attivi', 'Non attivi'],
+              datasets: [{
+                data: [active, inactive],
+                backgroundColor: ['#4BC0C0', '#CCCCCC']
+              }]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: 'bottom',
+                  labels: {
+                    padding: 10
+                  }
+                }
+              }
+            }
+          });
+
+        } catch (error) {
+          console.error("Errore nel caricamento dei dati utenti:", error);
+        }
+      }
+
+      loadOverview();
+      loadUserTrend();
+    </script>
+
+
+    <h2>Utenti</h2>
+    <!-- form per aggiungere nuovi admin -->
+    <!-- LINK PER APRIRE IL FORM -->
+    <a id="toggleAddAdmin">+ Aggiungi nuovo admin</a>
+
+    <!-- CONTENITORE NASCOSTO -->
+    <div id="addAdminContainer" style="display: none; margin-top: 10px;">
+      <form id="addAdminForm">
+          <input type="text" id="newFirst" placeholder="Nome" required />
+          <input type="text" id="newLast" placeholder="Cognome" required />
+          <input type="date" id="newBirth" placeholder="Data di nascita" required />
+          <input type="text" id="newUser" placeholder="Username" required />
+          <input type="email" id="newEmail" placeholder="Email" required />
+          <input type="password" id="newPass" placeholder="Password" required />
+          <button type="submit">Aggiungi Admin</button>
+      </form>
+      <p id="responseMsg"></p>
+    </div>
+
+    <table>
+      <thead>
+          <tr>
+            <th>USERNAME</th>
+            <th>EMAIL</th>
+            <th>ROLE</th>
+            <th>PROMOTE</th>
+          </tr>
+      </thead>
+
+      <tbody id="userList">
+
+      </tbody>
+    </table>
+
+    
+    <script src="/javascript/admin.js"></script>
+
+</div>
+

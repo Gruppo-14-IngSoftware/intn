@@ -13,6 +13,8 @@ const flash = require('connect-flash');
 const { storage } = require('./src/service/utilities/cloudinary');
 const eventsRouter = require('./src/service/routes/event');
 const methodOverride = require('method-override');
+const admin = require('./src/service/routes/admin');
+const cors = require('cors');
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 
@@ -21,10 +23,11 @@ connectDB();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(cors());
 
 //CONFIG MIDDLEWARE STATICI (da spostare)
 app.use(expressLayout);
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'src', 'public')));
 
 //CONFIG SESSIONE
 app.use(session({
@@ -64,6 +67,10 @@ app.set('view engine', 'ejs');
 app.use('/', main);
 app.use('/', authRoutes);
 app.use('/events', eventsRouter);
+app.use('/', admin);
+
+// Rotte stats
+app.use('/api/stats', admin);
 
 
 module.exports = app;

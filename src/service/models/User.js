@@ -42,7 +42,7 @@ const userSchema = new mongoose.Schema({
     
     role: {
         type: String,
-        enum: ['admin', 'user', 'comune', 'locale'],
+        enum: ['admin', 'user', 'comune', 'enterprise'],
         default: 'user',
     }
 });

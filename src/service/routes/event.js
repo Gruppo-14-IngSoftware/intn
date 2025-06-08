@@ -16,7 +16,7 @@ cloudinary.config({
 });
 
 router.get('/create', (req, res) => {
-    res.render('event/privateCreate', {
+    res.render('event/userCreate', {
         mapboxToken: process.env.MAPBOX_TOKEN,
         showLayoutParts: true
     });
@@ -50,13 +50,14 @@ router.post('/create', upload.array('image', 5), async (req, res) => {
             date: parsedDate,
             tag,
             images: imageUrls,
-            createdByRole: 'utente',
+            createdByRole: 'user',
             createdBy: req.user._id,
         });
         await newEvent.save();
         res.redirect('/event/' + newEvent._id);
         console.log('GEOCODING:', geoRes.data.features[0]);
         console.log("FILES RICEVUTI:", req.files);
+        console.log("Ruolo utente al momento della creazione:", req.user.role);
     } catch (err) {
         console.error('Errore creazione evento:', err);
         res.status(500).send('Errore nella creazione evento');
@@ -65,7 +66,7 @@ router.post('/create', upload.array('image', 5), async (req, res) => {
 });
 
 router.get('/create-public', (req, res) => {
-    res.render('event/publicCreate', {
+    res.render('event/organizationCreate', {
         mapboxToken: process.env.MAPBOX_TOKEN,
         showLayoutParts: true
     });
@@ -107,7 +108,7 @@ router.post('/create-public', upload.array('image', 5), async (req, res) => {
             images: imageUrls,
             documents: documentUrls,
             verified: false,
-            createdByRole: 'impresa',
+            createdByRole: 'enterprise',
             createdBy: req.user._id,
         });
         await newEvent.save();
@@ -120,7 +121,6 @@ router.post('/create-public', upload.array('image', 5), async (req, res) => {
         console.log('Cloudinary config:', process.env.CLOUD_NAME, process.env.CLOUD_API_KEY);
     }
 });
-
 router.post('/event/:id/subscribe', async (req, res) => {
     if (!req.user) return res.redirect('/login');
 
@@ -190,8 +190,6 @@ router.post('/event/:id/report', async (req, res) => {
         res.status(500).send('Errore durante la segnalazione.');
     }
 });
-
-
 
 async function notifySubscribers(eventId, newData) {
     const event = await Event.findById(eventId);

@@ -99,7 +99,7 @@ router.get('/logout', (req, res, next) => {
 router.get('/profile', ensureAuthenticated, async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
-    res.render('profile', {
+    res.render('user/profile', {
       user,
       title: 'Profilo utente',
       showLayoutParts: true
@@ -172,9 +172,6 @@ router.post('/profile/update', ensureAuthenticated, async (req, res) => {
     res.status(500).send("Errore durante l'aggiornamento del profilo.");
   }
 });
-
-
-
 
 //Elimina l’account dal database, termina la sessione e reindirizza alla homepage
 router.post('/profile/delete', ensureAuthenticated, async (req, res, next) => {

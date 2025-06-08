@@ -14,16 +14,8 @@ const flash = require('connect-flash');
 const { storage } = require('./src/service/utilities/cloudinary');
 const eventsRouter = require('./src/service/routes/event');
 const methodOverride = require('method-override');
-const admin = require('./src/service/routes/admin');
 const cors = require('cors');
-const { storage } = require('./src/service/utilities/cloudinary');
-app.use(express.urlencoded({ extended: true }));
-app.use(methodOverride('_method'));
-const cors = require('cors');
-const eventsRouter = require('./src/service/routes/event');
-const methodOverride = require('method-override');
-const admin = require('./src/service/routes/admin');
-const cors = require('cors');
+
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 

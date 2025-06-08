@@ -28,7 +28,7 @@ router.get('/', async (req, res) => {
         const apiTrento = await axios.get('https://www.comune.trento.it/api/opendata/v2/content/search/classes%20%27event%27');
         const dataAPI = apiTrento.data.searchHits;
 
-        const privateEvents = dataDB.map(e => ({
+        const userEvents = dataDB.map(e => ({
             id: e._id,
             title: e.title,
             description: e.description,
@@ -49,7 +49,7 @@ router.get('/', async (req, res) => {
             };
         });
 
-        const allEvents = [...privateEvents, ...TrentoEvents];
+        const allEvents = [...userEvents, ...TrentoEvents];
         allEvents.sort((a, b) => b.date - a.date);
 
         const totalCount = count + TrentoEvents.length;
@@ -63,13 +63,6 @@ router.get('/', async (req, res) => {
             user: req.user,
             nextPage: hasNextPage ? nextPage : null
         });
-    }catch (e) {
-        //error page
-    }
-
-    try{
-        const data = await Event.find();
-        res.render('index', { locals, data });
     }catch (e) {
         //error page
     }
@@ -111,7 +104,7 @@ router.get('/event/:id', async (req, res) => {
                 verified: true,
                 showLayoutParts: true
             };
-            return res.render('eventAPI', { locals, data: null, mapboxToken: process.env.MAPBOX_TOKEN });
+            return res.render('event/eventAPI', { locals, data: null, mapboxToken: process.env.MAPBOX_TOKEN });
         } else {
             const data = await Event.findById(slug)
                 .populate('createdBy', 'username')
@@ -134,7 +127,8 @@ router.get('/event/:id', async (req, res) => {
                 comments: data.comments,
                 showLayoutParts: true
             };
-            return res.render('event', { locals, data, user: req.user, mapboxToken: process.env.MAPBOX_TOKEN });
+            return res.render('event/event', { locals, data, user: req.user, mapboxToken: process.env.MAPBOX_TOKEN });
+            console.log("Ruolo utente al momento dell'acceso evento:", req.user.role);
         }
     } catch (e) {
         console.error("Errore nella visualizzazione evento:", e.message);
@@ -162,6 +156,7 @@ router.get('/event/:id/edit', isAuthenticated, isEventOwnerOrAdmin, async (req, 
             tag: event.tag
         }
     });
+    console.log("Ruolo utente al momento dell'acceso edit:", req.user.role);
 });
 
 router.put('/event/:id/edit', isAuthenticated, isEventOwnerOrAdmin, upload.array('image'), async (req, res) => {
@@ -183,6 +178,7 @@ router.put('/event/:id/edit', isAuthenticated, isEventOwnerOrAdmin, upload.array
 
         await data.save();
         res.redirect(`/event/${data._id}`);
+        console.log("Ruolo utente al momento del post edit:", req.user.role);
     } catch (err) {
         console.error("Errore", err);
         res.status(500).send("Errore");
@@ -238,17 +234,9 @@ router.delete('/event/:id', isAuthenticated, isEventOwnerOrAdmin, async (req, re
 //POST search
 router.post('/search', async (req, res) => {
     try{
-        let slug = req.params.id;
-        const data = await Event.findById({_id: slug});
-        const options = { day: '2-digit', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' };
-        const formattedDate = new Date(data.date).toLocaleString('it-IT', options);
         const locals = {
-            title : data.title,
-            description : data.description,
-            location: data.location,
-            date: formattedDate,
-            tag : data.tag,
-            image : data.imageUrl,
+            title : "intn",
+            description : "events webapp",
             showLayoutParts: true
         }
         const searchTerm = req.body.searchTerm.toLowerCase();
@@ -311,7 +299,5 @@ router.get('/admin/eventAdministrationFull', async (req, res) => {
         res.status(500).send('Errore caricamento pagina amministrazione');
     }
 });
-
-
 
 module.exports = router;

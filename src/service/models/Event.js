@@ -57,7 +57,7 @@ const eventSchema = new schema({
     },
     createdByRole: {
         type: String,
-        enum: ['user', 'impresa'],
+        enum: ['user', 'enterprise'],
         default: 'user'
     },
     comments: [commentSchema],

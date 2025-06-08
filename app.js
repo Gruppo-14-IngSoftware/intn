@@ -12,6 +12,9 @@ const app = express();
 const flash = require('connect-flash');
 const { storage } = require('./src/service/utilities/cloudinary');
 const eventsRouter = require('./src/service/routes/event');
+const methodOverride = require('method-override');
+app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride('_method'));
 
 //CONNESSIONE AL DB
 connectDB();
@@ -61,5 +64,6 @@ app.set('view engine', 'ejs');
 app.use('/', main);
 app.use('/', authRoutes);
 app.use('/events', eventsRouter);
+
 
 module.exports = app;

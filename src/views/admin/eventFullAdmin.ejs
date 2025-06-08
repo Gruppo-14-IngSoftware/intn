@@ -1,0 +1,76 @@
+<h1>Gestione Eventi</h1>
+
+<h2>Eventi Privati</h2>
+<% if (privateEvents.length === 0) { %>
+    <p>Nessun evento privato.</p>
+<% } else { %>
+    <ul>
+        <% privateEvents.forEach(event => { %>
+            <li>
+                <strong><%= event.title %></strong> - <%= new Date(event.date).toLocaleDateString() %>
+                <br>Creato da: <%= event.createdBy.username %>
+            </li>
+        <% }) %>
+    </ul>
+<% } %>
+
+<h2>Eventi Impresa da verificare</h2>
+<% if (impresaToVerify.length === 0) { %>
+    <p>Nessun evento da verificare.</p>
+<% } else { %>
+    <ul>
+        <% impresaToVerify.forEach(event => { %>
+            <li style="border: 1px solid #ccc; margin-bottom: 10px; padding: 10px;">
+                <h3><%= event.title %></h3>
+                <p><strong>Data:</strong> <%= new Date(event.date).toLocaleDateString() %></p>
+                <p><strong>Luogo:</strong> <%= event.location %></p>
+                <p><strong>Creato da:</strong> <%= event.createdBy.username %></p>
+                <% if (event.documents && event.documents.length > 0) { %>
+                    <p><strong>Documenti allegati:</strong></p>
+                    <ul>
+                        <% event.documents.forEach(doc => { %>
+                            <li><a href="<%= doc %>" target="_blank" rel="noopener noreferrer">Visualizza documento</a></li>
+                        <% }) %>
+                    </ul>
+                <% } %>
+                <form method="POST" action="/admin/approve/<%= event._id %>">
+                    <button type="submit">Approva evento ✅</button>
+                </form>
+            </li>
+        <% }) %>
+    </ul>
+<% } %>
+
+<h2>Eventi Impresa verificati</h2>
+<% if (impresaVerified.length === 0) { %>
+    <p>Nessun evento verificato.</p>
+<% } else { %>
+    <ul>
+        <% impresaVerified.forEach(event => { %>
+            <li>
+                <strong><%= event.title %></strong> - <%= new Date(event.date).toLocaleDateString() %>
+                <br>Creato da: <%= event.createdBy.username %>
+            </li>
+        <% }) %>
+    </ul>
+<% } %>
+
+<h2>Eventi Segnalati</h2>
+
+<% if (reportedEvents.length === 0) { %>
+    <p>Nessun evento segnalato.</p>
+<% } else { %>
+    <ul>
+        <% reportedEvents.forEach(event => { %>
+            <li style="border: 1px solid #f00; margin-bottom: 10px; padding: 10px;">
+                <a href="/event/<%= event._id %>"><%= event.title %></a>
+                <p>Segnalato da:
+                    <% event.segnalazioni.forEach((report, idx) => { %>
+                        <%= report.username %><%= idx < event.segnalazioni.length - 1 ? ', ' : '' %>
+                    <% }) %>
+                </p>
+            </li>
+        <% }) %>
+    </ul>
+<% } %>
+

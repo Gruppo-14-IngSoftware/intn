@@ -7,6 +7,7 @@ const path = require('path');
 const axios = require('axios');
 const cloudinary = require('cloudinary').v2;
 const nodemailer = require('nodemailer');
+const { isAuthenticated, isEventOwnerOrAdmin } = require('../middlewares/auth');
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -15,7 +16,7 @@ cloudinary.config({
 });
 
 router.get('/create', (req, res) => {
-    res.render('create/privateCreate', {
+    res.render('event/privateCreate', {
         mapboxToken: process.env.MAPBOX_TOKEN,
         showLayoutParts: true
     });
@@ -64,7 +65,7 @@ router.post('/create', upload.array('image', 5), async (req, res) => {
 });
 
 router.get('/create-public', (req, res) => {
-    res.render('create/publicCreate', {
+    res.render('event/publicCreate', {
         mapboxToken: process.env.MAPBOX_TOKEN,
         showLayoutParts: true
     });
@@ -163,6 +164,34 @@ router.post('/event/:id/unsubscribe', async (req, res) => {
         res.status(500).send("Errore durante la disiscrizione");
     }
 });
+router.post('/event/:id/report', async (req, res) => {
+    try {
+        if (!req.user) {
+            return res.status(401).send('Devi essere autenticato per segnalare un evento.');
+        }
+        const eventId = req.params.id;
+        const userId = req.user._id;
+        const username = req.user.username;
+
+        const event = await Event.findById(eventId);
+        if (!event) return res.status(404).send('Evento non trovato.');
+
+        const alreadyReported = event.segnalazioni.some(s => s.userId.equals(userId));
+        if (alreadyReported) {
+            return res.status(400).send('Hai già segnalato questo evento.');
+        }
+
+        event.segnalazioni.push({ userId, username });
+        await event.save();
+
+        res.redirect(`/event/${eventId}`);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Errore durante la segnalazione.');
+    }
+});
+
+
 
 async function notifySubscribers(eventId, newData) {
     const event = await Event.findById(eventId);

@@ -3,7 +3,10 @@ const express = require('express');
 const router = express.Router();
 const Event = require('../models/Event');
 const User = require('../models/User');
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
 const axios = require('axios');
+const { isAuthenticated, isEventOwnerOrAdmin } = require('../middlewares/auth');
 
 //ROUTING CON INDICATORE NUMERO DELLE PAGINE
 router.get('/', async (req, res) => {
@@ -97,9 +100,11 @@ router.get('/event/:id', async (req, res) => {
                 tag: "Comune Comunale",
                 images,
                 createdBy: "Comune di Trento",
+                createdByRole: "Ammministrazione Comunale",
+                verified: true,
                 showLayoutParts: true
             };
-            return res.render('event', { locals, data: null, mapboxToken: process.env.MAPBOX_TOKEN });
+            return res.render('eventAPI', { locals, data: null, mapboxToken: process.env.MAPBOX_TOKEN });
         } else {
             const data = await Event.findById(slug)
                 .populate('createdBy', 'username')
@@ -117,6 +122,8 @@ router.get('/event/:id', async (req, res) => {
                 tag: data.tag,
                 images: data.images && data.images.length ? data.images : [data.imageUrl],
                 createdBy: data.createdBy,
+                createdByRole: data.createdByRole,
+                verified: data.verified,
                 comments: data.comments,
                 showLayoutParts: true
             };
@@ -125,6 +132,53 @@ router.get('/event/:id', async (req, res) => {
     } catch (e) {
         console.error("Errore nella visualizzazione evento:", e.message);
         res.status(404).render('404', { showLayoutParts: true });
+    }
+});
+
+router.get('/event/:id/edit', isAuthenticated, isEventOwnerOrAdmin, async (req, res) => {
+    const event = await Event.findById(req.params.id);
+    if (!event) return res.status(404).send("Evento");
+
+    const [street, city, province, country] = event.location.split(',').map(x => x.trim());
+
+    res.render('event/edit', {
+        data: event,
+        user: req.user,
+        values: {
+            title: event.title,
+            description: event.description,
+            street,
+            city,
+            province,
+            country,
+            date: event.date.toISOString().slice(0, 16),
+            tag: event.tag
+        }
+    });
+});
+
+router.put('/event/:id/edit', isAuthenticated, isEventOwnerOrAdmin, upload.array('image'), async (req, res) => {
+    try {
+        const { title, description, street, city, province, country, date, tag } = req.body;
+
+        const data = await Event.findById(req.params.id);
+        if (!data) return res.status(404).send("Evento non trovato");
+
+        data.title = title;
+        data.description = description;
+        data.location = `${street}, ${city}, ${province}, ${country}`;
+        data.date = new Date(date);
+        data.tag = tag;
+
+        if (req.files.length) {
+            data.images = req.files.map(file => '/uploads/' + file.filename);
+        }
+
+        await data.save();
+        res.redirect(`/event/${data._id}`);
+    } catch (err) {
+        console.error("Errore", err);
+        res.status(500).send("Errore");
     }
 });
 
@@ -150,6 +204,28 @@ router.post('/event/:id/comment', async (req, res) => {
         res.status(500).send("Errore interno.");
     }
 });
+
+router.get('/event/:id/delete', isAuthenticated, isEventOwnerOrAdmin, async (req, res) => {
+    const event = await Event.findById(req.params.id);
+    if (!event) return res.status(404).send('Evento non trovato');
+
+    res.render('event/delete', {
+        event,
+        user: req.user
+    });
+});
+
+router.delete('/event/:id', isAuthenticated, isEventOwnerOrAdmin, async (req, res) => {
+    try {
+        await Event.findByIdAndDelete(req.params.id);
+        res.redirect('/');
+    } catch (err) {
+        console.error("Errore eliminazione:", err);
+        res.status(500).send('Errore server');
+    }
+});
+
+
 
 //POST ROUTE
 //POST search
@@ -201,28 +277,26 @@ router.post('/search', async (req, res) => {
     }
     //res.send('index');
 });
-
-router.get('/admin/pending-events', async (req, res) => {
+router.get('/admin/eventAdministrationFull', async (req, res) => {
     try {
-        const pendingEvents = await Event.find({ verified: false });
-        res.render('admin/eventAdministration', {
-            pendingEvents,
+        const events = await Event.find().populate('createdBy', 'username').lean();
+
+        const privati = events.filter(e => e.createdByRole === 'user');
+        const impresaToVerify = events.filter(e => e.createdByRole === 'impresa' && !e.verified);
+        const impresaVerified = events.filter(e => e.createdByRole === 'impresa' && e.verified);
+        const reportedEvents = events.filter(e => e.segnalazioni && e.segnalazioni.length > 0);
+
+        res.render('admin/eventFullAdmin', {
+            events: { privati, impresaToVerify, impresaVerified },
+            reportedEvents,
             showLayoutParts: true
         });
     } catch (err) {
-        console.error('Errore caricamento eventi da approvare:', err);
-        res.status(500).send('Errore nel caricamento eventi');
+        console.error(err);
+        res.status(500).send('Errore caricamento pagina amministrazione');
     }
 });
 
-router.post('/admin/approve/:id', async (req, res) => {
-    try {
-        await Event.findByIdAndUpdate(req.params.id, { verified: true });
-        res.redirect('/admin/pending-events');
-    } catch (err) {
-        console.error('Errore approvazione evento:', err);
-        res.status(500).send('Errore approvazione evento');
-    }
-});
+
 
 module.exports = router;

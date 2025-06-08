@@ -101,33 +101,6 @@
 </head>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
-<script>
-    mapboxgl.accessToken = "<%= mapboxToken %>";
-
-    const position = "<%= locals.location %>";
-
-    fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(position)}.json?access_token=${mapboxgl.accessToken}`)
-        .then(res => res.json())
-        .then(data => {
-            const coords = data.features[0].center;
-
-            const map = new mapboxgl.Map({
-                container: 'map',
-                style: 'mapbox://styles/mapbox/streets-v12',
-                center: coords,
-                zoom: 13
-            });
-
-            new mapboxgl.Marker()
-                .setLngLat(coords)
-                .setPopup(new mapboxgl.Popup().setText(position))
-                .addTo(map);
-        })
-        .catch(err => {
-            console.error("Errore geocoding:", err);
-            document.getElementById('map').innerText = 'Mappa non disponibile';
-        });
-</script>
 <body>
     <% if (Array.isArray(locals.images) && locals.images.length > 0) { %>
         <div id="eventCarousel" class="carousel slide mb-3" data-bs-ride="carousel">
@@ -167,6 +140,10 @@
 
     <% if (locals.createdBy && locals.createdBy.username) { %>
         <p class="text-muted">Creato da: <strong><%= locals.createdBy.username %></strong></p>
+    <% } %>
+    <% if (locals.createdByRole === 'impresa') { %>
+        <p><strong>Organizzato da:</strong> <%= locals.createdBy.username || 'Impresa' %></p>
+        <p><strong>Evento verificato:</strong> <%= locals.verified ? 'SI' : 'NO' %></p>
     <% } %>
 
     <% if (user) { %>
@@ -213,9 +190,27 @@
                     </div>
                 </div>
             </div>
-       <% } %>
-        <i class="fa-solid fa-flag" title="Segnala evento"></i>
-        <i class="fa-solid fa-pen-to-square" title="Modifica evento"></i>
+            <% } %>
+                <% if (user) { %>
+                    <form action="/event/<%= data._id %>/report" method="POST" style="display:inline;">
+                    <button type="submit" title="Segnala evento" class="btn btn-outline-danger">
+                    <i class="fa-solid fa-flag"></i> Segnala evento
+                    </button>
+                    </form>
+                <% } else { %>
+                    <p><a href="/login">Accedi</a> per segnalare questo evento.</p>
+            <% } %>
+
+        <% if (user && data && (user._id.toString() === data.createdBy._id.toString() || user.role === 'admin')) { %>
+            <a a href="/event/<%= data._id %>/edit" class="btn btn-outline-secondary">
+                <i class="fa-solid fa-pen-to-square"></i> Modifica evento
+            </a>
+            <form id="deleteForm" action="/event/<%= data._id %>?_method=DELETE" method="POST" style="display: inline;">
+                <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Sei sicuro di voler eliminare questo evento?')">
+                    <i class="fa-solid fa-trash"></i> Elimina
+                </button>
+            </form>
+        <% } %>
     </div>
 
     <div id="map"></div>
@@ -245,7 +240,33 @@
             menu.style.display = (menu.style.display === 'none') ? 'block' : 'none';
         }
     </script>
+    <script>
+        mapboxgl.accessToken = "<%= mapboxToken %>";
 
+        const position = "<%= locals.location %>";
+
+        fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(position)}.json?access_token=${mapboxgl.accessToken}`)
+            .then(res => res.json())
+            .then(data => {
+                const coords = data.features[0].center;
+
+                const map = new mapboxgl.Map({
+                    container: 'map',
+                    style: 'mapbox://styles/mapbox/streets-v12',
+                    center: coords,
+                    zoom: 13
+                });
+
+                new mapboxgl.Marker()
+                    .setLngLat(coords)
+                    .setPopup(new mapboxgl.Popup().setText(position))
+                    .addTo(map);
+            })
+            .catch(err => {
+                console.error("Errore geocoding:", err);
+                document.getElementById('map').innerText = 'Mappa non disponibile';
+            });
+    </script>
 </body>
 </html>
 

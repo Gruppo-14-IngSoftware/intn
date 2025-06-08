@@ -78,4 +78,7 @@ app.use('/', authRoutes);
 app.use('/events', eventsRouter);
 app.use('/', admin);
 
+// Rotte stats
+app.use('/api/stats', admin);
+
 module.exports = app;

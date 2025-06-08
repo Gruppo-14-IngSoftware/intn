@@ -96,6 +96,7 @@
             border-radius: 10px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
+        #map { height: 400px; border-radius: 10px; margin-bottom: 20px; }
     </style>
 </head>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -128,103 +129,122 @@
         });
 </script>
 <body>
-<% if (Array.isArray(locals.images) && locals.images.length > 0) { %>
-    <div id="eventCarousel" class="carousel slide mb-3" data-bs-ride="carousel">
-        <div class="carousel-inner" style="border-radius: 10px; overflow: hidden;">
-            <% locals.images.forEach(function(img, index) { %>
-                <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
-                    <img src="<%= img %>" class="d-block w-100 eventImage" alt="Immagine evento <%= index + 1 %>">
+    <% if (Array.isArray(locals.images) && locals.images.length > 0) { %>
+        <div id="eventCarousel" class="carousel slide mb-3" data-bs-ride="carousel">
+            <div class="carousel-inner" style="border-radius: 10px; overflow: hidden;">
+                <% locals.images.forEach(function(img, index) { %>
+                    <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                        <img src="<%= img %>" class="d-block w-100 eventImage" alt="Immagine evento <%= index + 1 %>">
+                    </div>
+                <% }) %>
+            </div>
+            <% if (locals.images.length > 1) { %>
+                <button class="carousel-control-prev" type="button" data-bs-target="#eventCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Precedente</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#eventCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Successivo</span>
+                </button>
+            <% } %>
+        </div>
+    <% } else { %>
+        <img src="<%= locals.image || '/images/default.jpg' %>" alt="Immagine evento" class="eventImage">
+    <% } %>
+    <div class="eventTitle"><%= locals.title %></div>
+    <% if (locals.tag) { %>
+        <div class="mb-3">
+            <span class="badge bg-primary"><%= locals.tag %></span>
+        </div>
+    <% } %>
+
+    <div class="eventDetails">
+        <p><strong>Data:</strong> <%= locals.date %></p>
+        <p><strong>Luogo:</strong> <%= locals.location %></p>
+        <p><%= locals.description %></p>
+    </div>
+
+    <% if (locals.createdBy && locals.createdBy.username) { %>
+        <p class="text-muted">Creato da: <strong><%= locals.createdBy.username %></strong></p>
+    <% } %>
+
+    <% if (user) { %>
+        <form action="/event/<%= data._id %>/subscribe" method="POST">
+            <button class="btn btn-primary btn-lg" type="submit">
+                <i class="fa-solid fa-bell"></i> Iscriviti
+            </button>
+        </form>
+    <% } else { %>
+        <p><a href="/login">Accedi</a> per iscriverti a questo evento.</p>
+    <% } %>
+
+    <% if (user && Array.isArray(user.subscribedEvents) && user.subscribedEvents.includes(data._id.toString())) { %>
+        <form action="/event/<%= data._id %>/unsubscribe" method="POST">
+            <button class="btn btn-warning btn-lg" type="submit">
+                <i class="fa-solid fa-bell-slash"></i> Disiscriviti
+            </button>
+        </form>
+    <% } %>
+
+
+    <a href="https://www.google.com/calendar/render?action=TEMPLATE&text=<%= encodeURIComponent(locals.title) %>&dates=<%= new Date(data.date).toISOString().replace(/[-:]|\.\d{3}/g, '') %>/<%= new Date(new Date(data.date).getTime() + 2 * 60 * 60 * 1000).toISOString().replace(/[-:]|\.\d{3}/g, '') %>&details=<%= encodeURIComponent(locals.description) %>&location=<%= encodeURIComponent(locals.location) %>"
+       target="_blank" class="btn btn-success mt-2">
+        <i class="fa fa-calendar-plus"></i> Aggiungi a Google Calendar
+    </a>
+
+    <div class="eventBox">
+        <% if (data && data._id) { %>
+            <div class="mb-4">
+                <i class="fa-solid fa-share-nodes me-2" onclick="toggleShareMenu()"></i>
+                <div id="shareMenu" style="display: none; padding-top: 10px;">
+                    <input type="text" readonly class="form-control mb-2" value="<%= '/event/' + data._id %>">
+
+                    <div class="d-flex justify-content-around">
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent('/event/' + data._id) %>" target="_blank" class="btn btn-primary">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="https://twitter.com/intent/tweet?url=<%= encodeURIComponent('/event/' + data._id) %>" target="_blank" class="btn btn-info text-white">
+                            <i class="fab fa-x-twitter"></i>
+                        </a>
+                        <a href="mailto:?subject=Evento: <%= encodeURIComponent(locals.title) %>&body=Guarda questo evento: <%= locals._id %>" class="btn btn-danger">
+                            <i class="fas fa-envelope"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+       <% } %>
+        <i class="fa-solid fa-flag" title="Segnala evento"></i>
+        <i class="fa-solid fa-pen-to-square" title="Modifica evento"></i>
+    </div>
+
+    <div id="map"></div>
+
+    <div class="comments">
+        <h3>Commenti</h3>
+
+        <form action="/event/<%= data._id %>/comment" method="POST" class="comment-box">
+        <textarea name="comment" rows="3" placeholder="Scrivi un commento..." required></textarea>
+            <br>
+            <button type="submit">Pubblica</button>
+        </form>
+        <% if (locals.comments && locals.comments.length > 0) { %>
+            <% locals.comments.forEach(function(comment) { %>
+                <div class="comment">
+                    <p><%= comment.text %></p>
+                    <small>Da: <%= comment.author.username %> - <%= new Date(comment.createdAt).toLocaleString("it-IT") %></small>
                 </div>
             <% }) %>
-        </div>
-        <% if (locals.images.length > 1) { %>
-            <button class="carousel-control-prev" type="button" data-bs-target="#eventCarousel" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Precedente</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#eventCarousel" data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Successivo</span>
-            </button>
+        <% } else { %>
+            <p>Nessun commento ancora.</p>
         <% } %>
     </div>
-<% } else { %>
-    <img src="<%= locals.image || '/images/default.jpg' %>" alt="Immagine evento" class="eventImage">
-<% } %>
-<div class="eventTitle"><%= locals.title %></div>
-<% if (locals.tag) { %>
-    <div class="mb-3">
-        <span class="badge bg-primary"><%= locals.tag %></span>
-    </div>
-<% } %>
-
-<div class="eventDetails">
-    <p><strong>Data:</strong> <%= locals.date %></p>
-    <p><strong>Luogo:</strong> <%= locals.location %></p>
-    <p><%= locals.description %></p>
-</div>
-<% if (user) { %>
-    <form action="/event/<%= data._id %>/subscribe" method="POST">
-        <button class="btn btn-primary btn-lg" type="submit">
-            <i class="fa-solid fa-bell"></i> Iscriviti
-        </button>
-    </form>
-<% } else { %>
-    <p><a href="/login">Accedi</a> per iscriverti a questo evento.</p>
-<% } %>
-
-
-<div class="eventBox">
-    <div class="mb-4">
-        <i class="fa-solid fa-share-nodes me-2" onclick="toggleShareMenu()"></i>
-        <div id="shareMenu" style="display: none; padding-top: 10px;">
-            <input type="text" readonly class="form-control mb-2" value="<%= '' + locals._id %>">
-
-            <div class="d-flex justify-content-around">
-                <a href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent('' + locals._id) %>" target="_blank" class="btn btn-primary">
-                    <i class="fab fa-facebook-f"></i>
-                </a>
-                <a href="https://twitter.com/intent/tweet?url=<%= encodeURIComponent('' + locals._id) %>" target="_blank" class="btn btn-info text-white">
-                    <i class="fab fa-x-twitter"></i>
-                </a>
-                <a href="mailto:?subject=Evento: <%= encodeURIComponent(locals.title) %>&body=Guarda questo evento: <%= locals._id %>" class="btn btn-danger">
-                    <i class="fas fa-envelope"></i>
-                </a>
-            </div>
-        </div>
-    </div>
-    <i class="fa-solid fa-flag" title="Segnala evento"></i>
-    <i class="fa-solid fa-pen-to-square" title="Modifica evento"></i>
-</div>
-
-<div id="map"></div>
-
-<div class="comments">
-    <h3>Commenti</h3>
-
-    <form action="/event/<%= locals._id %>/comment" method="POST" class="comment-box">
-        <textarea name="comment" rows="3" placeholder="Scrivi un commento..." required></textarea>
-        <br>
-        <button type="submit">Pubblica</button>
-    </form>
-
-    <% if (locals.comments && locals.comments.length > 0) { %>
-        <% locals.comments.forEach(function(comment) { %>
-            <div class="comment">
-                <p><%= comment.text %></p>
-                <small>Da: <%= comment.author %></small>
-            </div>
-        <% }) %>
-    <% } else { %>
-        <p>Nessun commento ancora.</p>
-    <% } %>
-</div>
-<script>
-    function toggleShareMenu() {
-        const menu = document.getElementById('shareMenu');
-        menu.style.display = (menu.style.display === 'none') ? 'block' : 'none';
-    }
-</script>
+    <script>
+        function toggleShareMenu() {
+            const menu = document.getElementById('shareMenu');
+            menu.style.display = (menu.style.display === 'none') ? 'block' : 'none';
+        }
+    </script>
 
 </body>
 </html>

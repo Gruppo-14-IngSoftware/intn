@@ -1,6 +1,18 @@
 //SCHEMA EVENTO
 const mongoose = require('mongoose');
 const schema = mongoose.Schema;
+const commentSchema = new mongoose.Schema({
+    text: { type: String, required: true },
+    author: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+});
 const eventSchema = new schema({
     title:{
         type: String,
@@ -30,6 +42,25 @@ const eventSchema = new schema({
         required: true
     },
     images: [String],
+    verified: {
+        type: Boolean,
+        default: false
+    },
+    documents: {
+        type: [String],
+        default: []
+    },
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    createdByRole: {
+        type: String,
+        enum: ['user', 'impresa'],
+        default: 'user'
+    },
+    comments: [commentSchema],
     createdAt:{
         type:Date,
         default:Date.now

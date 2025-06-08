@@ -1,0 +1,27 @@
+<h1>Eventi in attesa di verifica</h1>
+
+<% if (pendingEvents.length === 0) { %>
+    <p>Nessun evento in attesa.</p>
+<% } %>
+
+<ul>
+    <% pendingEvents.forEach(event => { %>
+        <li style="border: 1px solid #ccc; margin-bottom: 10px; padding: 10px;">
+            <h2><%= event.title %></h2>
+            <p><strong>Data:</strong> <%= event.date %></p>
+            <p><strong>Luogo:</strong> <%= event.location %></p>
+            <p><strong>Descrizione:</strong> <%= event.description %></p>
+
+            <p><strong>Documenti allegati:</strong></p>
+            <ul>
+                <% (event.documents || []).forEach(doc => { %>
+                    <li><a href="<%= doc %>" target="_blank">Visualizza documento</a></li>
+                <% }) %>
+            </ul>
+
+            <form method="POST" action="/admin/approve/<%= event._id %>">
+                <button type="submit">Approva evento ✅</button>
+            </form>
+        </li>
+    <% }) %>
+</ul>

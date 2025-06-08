@@ -25,13 +25,14 @@ const userSchema = new mongoose.Schema({
         required: true,
     },
     googleId: String,
+    subscribedEvents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Event' }],
     password: {
         type: String,
         required: true,
     },
     role: {
         type: String,
-        enum: ['admin', 'user', 'comune', 'locale'],
+        enum: ['admin', 'user', 'comune', 'enterprise'],
         default: 'user',
     }
 });

@@ -11,5 +11,7 @@
 #CARTELLA DA NON AVERE SU GITHUB
 .idea/
 node_modules/
+uploads
 #FILE DA NON AVERE SU GITHUB
 .env
+.gitignore

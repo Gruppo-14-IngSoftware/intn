@@ -57,6 +57,7 @@ router.get('/', async (req, res) => {
         res.render('index', { locals,
             events: paginatedEvents,
             current: page,
+            user: req.user,
             nextPage: hasNextPage ? nextPage : null
         });
     }catch (e) {
@@ -69,7 +70,7 @@ router.get('/about', (req, res) =>{
     res.send('about');
 });
 
-//EVENT PAGE ROUTING DA RENDERE PIù OTTIMIZZATA!!!!
+//EVENT PAGE
 router.get('/event/:id', async (req, res) => {
     try {
         const slug = req.params.id;
@@ -93,13 +94,16 @@ router.get('/event/:id', async (req, res) => {
                 description,
                 location,
                 date: formattedDate,
-                tag: "Comune di Trento",
+                tag: "Comune Comunale",
                 images,
+                createdBy: "Comune di Trento",
                 showLayoutParts: true
             };
             return res.render('event', { locals, data: null, mapboxToken: process.env.MAPBOX_TOKEN });
         } else {
-            const data = await Event.findById(slug);
+            const data = await Event.findById(slug)
+                .populate('createdBy', 'username')
+                .populate('comments.author', 'username');
             const options = { day: '2-digit', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' };
             const formattedDate = DateTime
                 .fromJSDate(data.date, { zone: 'utc' })
@@ -112,6 +116,8 @@ router.get('/event/:id', async (req, res) => {
                 date: formattedDate,
                 tag: data.tag,
                 images: data.images && data.images.length ? data.images : [data.imageUrl],
+                createdBy: data.createdBy,
+                comments: data.comments,
                 showLayoutParts: true
             };
             return res.render('event', { locals, data, user: req.user, mapboxToken: process.env.MAPBOX_TOKEN });
@@ -119,6 +125,29 @@ router.get('/event/:id', async (req, res) => {
     } catch (e) {
         console.error("Errore nella visualizzazione evento:", e.message);
         res.status(404).render('404', { showLayoutParts: true });
+    }
+});
+
+
+router.post('/event/:id/comment', async (req, res) => {
+    try {
+        const { comment } = req.body;
+        const event = await Event.findById(req.params.id);
+
+        if (!event) {
+            return res.status(404).send("Evento non trovato.");
+        }
+
+        event.comments.push({
+            text: comment,
+            author: req.user._id
+        });
+
+        await event.save();
+        res.redirect(`/event/${req.params.id}`);
+    } catch (err) {
+        console.error("Errore nel salvataggio commento:", err);
+        res.status(500).send("Errore interno.");
     }
 });
 
@@ -171,6 +200,29 @@ router.post('/search', async (req, res) => {
         //error page
     }
     //res.send('index');
+});
+
+router.get('/admin/pending-events', async (req, res) => {
+    try {
+        const pendingEvents = await Event.find({ verified: false });
+        res.render('admin/eventAdministration', {
+            pendingEvents,
+            showLayoutParts: true
+        });
+    } catch (err) {
+        console.error('Errore caricamento eventi da approvare:', err);
+        res.status(500).send('Errore nel caricamento eventi');
+    }
+});
+
+router.post('/admin/approve/:id', async (req, res) => {
+    try {
+        await Event.findByIdAndUpdate(req.params.id, { verified: true });
+        res.redirect('/admin/pending-events');
+    } catch (err) {
+        console.error('Errore approvazione evento:', err);
+        res.status(500).send('Errore approvazione evento');
+    }
 });
 
 module.exports = router;

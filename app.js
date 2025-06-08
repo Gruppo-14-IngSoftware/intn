@@ -21,6 +21,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 const cors = require('cors');
 const eventsRouter = require('./src/service/routes/event');
+const methodOverride = require('method-override');
+app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride('_method'));
 
 //CONNESSIONE AL DB
 connectDB();

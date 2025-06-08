@@ -1,0 +1,59 @@
+<h1 class="text-center mt-4 mb-4">Modifica Evento</h1>
+
+<form action="/event/<%= data._id %>/edit?_method=PUT" method="POST" enctype="multipart/form-data">
+    <div class="form-group mb-3">
+        <label for="title">Titolo</label>
+        <input type="text" class="form-control" id="title" name="title" required value="<%= values.title %>" />
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="description">Descrizione</label>
+        <textarea class="form-control" id="description" name="description" rows="4" required><%= values.description %></textarea>
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="street">Via e numero civico</label>
+        <input type="text" name="street" id="street" class="form-control" required value="<%= values.street %>">
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="city">Città</label>
+        <input type="text" name="city" id="city" class="form-control" required value="<%= values.city %>">
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="province">Provincia</label>
+        <input type="text" name="province" id="province" class="form-control" required value="<%= values.province %>">
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="country">Paese</label>
+        <input type="text" name="country" id="country" class="form-control" required value="<%= values.country %>">
+    </div>
+
+    <div class="row">
+        <div class="form-group mb-3 col-md-6">
+            <label for="date">Data e ora</label>
+            <input type="datetime-local" class="form-control" id="date" name="date" value="<%= values.date %>" required />
+        </div>
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="tag">Categoria</label>
+        <select class="form-select" id="tag" name="tag" required>
+            <option value="sport" <%= values.tag === 'sport' ? 'selected' : '' %>>Sport</option>
+            <option value="lettura" <%= values.tag === 'lettura' ? 'selected' : '' %>>Lettura</option>
+            <option value="passeggiata" <%= values.tag === 'passeggiata' ? 'selected' : '' %>>Passeggiata</option>
+            <option value="musica" <%= values.tag === 'musica' ? 'selected' : '' %>>Musica</option>
+            <option value="teatro" <%= values.tag === 'teatro' ? 'selected' : '' %>>Teatro</option>
+            <option value="altro" <%= values.tag === 'altro' ? 'selected' : '' %>>Altro</option>
+        </select>
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="image">Nuove Immagini evento (facoltative)</label>
+        <input type="file" class="form-control" id="image" name="image" accept="image/*" multiple/>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100">Salva modifiche</button>
+</form>

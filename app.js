@@ -11,8 +11,21 @@ const session = require('express-session');
 const passport = require('passport');
 const app = express();
 const flash = require('connect-flash');
+const { storage } = require('./src/service/utilities/cloudinary');
+const eventsRouter = require('./src/service/routes/event');
+const methodOverride = require('method-override');
+const admin = require('./src/service/routes/admin');
 const cors = require('cors');
-
+const { storage } = require('./src/service/utilities/cloudinary');
+app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride('_method'));
+const cors = require('cors');
+const eventsRouter = require('./src/service/routes/event');
+const methodOverride = require('method-override');
+const admin = require('./src/service/routes/admin');
+const cors = require('cors');
+app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride('_method'));
 
 //CONNESSIONE AL DB
 connectDB();
@@ -51,6 +64,7 @@ app.use((req, res, next) => {
 // Middleware per rendere l'utente disponibile nei template
 app.use((req, res, next) => {
     res.locals.user = req.user || null;
+    res.locals.role = req.user ? req.user.role : null;
     next();
 });
 
@@ -61,6 +75,7 @@ app.set('view engine', 'ejs');
 
 app.use('/', main);
 app.use('/', authRoutes);
+app.use('/events', eventsRouter);
 app.use('/', admin);
 
 // Rotte stats

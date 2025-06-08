@@ -11,7 +11,7 @@ function ensureAuthenticated(req, res, next) {
 
 //ROUTING ALLA REGISTRAZIONE GET
 router.get('/signup', (req, res) => {
-    res.render('./signup', {
+    res.render('auth/signup', {
             title: 'Registrati',
             error: [],
             formData: {},
@@ -20,7 +20,7 @@ router.get('/signup', (req, res) => {
     );
 });
 
-//REOUTING ALLA REGISTRAZIONE POST CON CONTROLLO DEI DATI
+//ROUTING ALLA REGISTRAZIONE POST CON CONTROLLO DEI DATI
 router.post('/signup', async (req, res) => {
     const { firstname, lastname, birthdate, username, email, password, confirmPassword } = req.body;
     const error = [];
@@ -60,7 +60,7 @@ router.post('/signup', async (req, res) => {
 
 //ROUTING AL LOGIN GET
 router.get('/login', (req, res) => {
-    res.render('./login', {
+    res.render('auth/login', {
             showLayoutParts: false
         }
     );
@@ -76,8 +76,7 @@ router.post('/login',
   })
 );
 
-
-//ROUTING AL LOGIN GET-GOOGLE
+//ROUTING AL LOGIN GET
 router.get('/auth/google', passport.authenticate('google', {
     scope: ['profile', 'email']
 }));

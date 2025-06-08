@@ -4,23 +4,23 @@
     <meta charset="utf-8">
     <title><%= locals.title%></title>
     <meta name="description" content="<%= locals.desc%>">
-    <link rel="stylesheet" href="/stylesheets/style.css">  <!--link diretto, senza le sovracartelle pk è nella cartella public -->
+    <link rel="stylesheet" href="../stylesheets/style.css">  <!--link diretto, senza le sovracartelle pk è nella cartella public -->
     <script type="text/javascript" defer src="/javascript/script.js"></script>
 </head>
 <body>
-    <!-- <h1>Main</h1>
-    -->
-    <div class="container">
+
+    <div class="main-container">
         <% if (typeof showLayoutParts === 'undefined' || showLayoutParts) { %>
             <%- include('../partials/header') %>
         <% } %>
+
         <main class="main">
             <%- body %>
         </main>
+
         <% if (typeof showLayoutParts === 'undefined' || showLayoutParts) { %>
             <%- include('../partials/footer') %>
         <% } %>
-
     </div>
 
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>

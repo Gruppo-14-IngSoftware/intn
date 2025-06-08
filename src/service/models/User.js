@@ -25,6 +25,7 @@ const userSchema = new mongoose.Schema({
         required: true,
     },
     googleId: String,
+    subscribedEvents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Event' }],
     password: {
         type: String,
         required: true,
@@ -39,6 +40,11 @@ const userSchema = new mongoose.Schema({
         type: Date, default: Date.now 
     }
     
+    role: {
+        type: String,
+        enum: ['admin', 'user', 'comune', 'enterprise'],
+        default: 'user',
+    }
 });
 //HASHING DELLA PASSWORD MEDIANTE SALTING, PER NON LASCIARLA IN CHIARO
 userSchema.pre('save', async function (next) {

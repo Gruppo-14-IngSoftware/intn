@@ -1,4 +1,4 @@
-//SETUP EXPRESS APP, MIDDLEWARE e ROTTE
+//SETUP EXPRESS APP e ROTTE
 const express = require('express');
 const expressLayout = require('express-ejs-layouts');
 const path = require('path');

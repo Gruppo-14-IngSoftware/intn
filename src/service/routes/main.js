@@ -7,6 +7,7 @@ const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 const axios = require('axios');
 const { isAuthenticated, isEventOwnerOrAdmin } = require('../middlewares/auth');
+const {cloudinary} = require("../utilities/cloudinary");
 
 //ROUTING CON INDICATORE NUMERO DELLE PAGINE
 router.get('/', async (req, res) => {
@@ -14,7 +15,8 @@ router.get('/', async (req, res) => {
         const locals = {
             title: "intn",
             description: "events webapp",
-            showLayoutParts: true
+            showLayoutParts: true,
+            showLayoutCar : true
         }
         let perPage = 10;
         let page = parseInt(req.query.page) || 1;
@@ -24,7 +26,6 @@ router.get('/', async (req, res) => {
         }]).skip(perPage * (page - 1)).limit(perPage).exec();
 
         const count = await Event.countDocuments();
-
         const apiTrento = await axios.get('https://www.comune.trento.it/api/opendata/v2/content/search/classes%20%27event%27');
         const dataAPI = apiTrento.data.searchHits;
 
@@ -37,13 +38,30 @@ router.get('/', async (req, res) => {
             date: new Date(e.date)
         }));
 
+        const baseUrl = 'https://www.comune.trento.it';
         const TrentoEvents = dataAPI.map(e => {
-            const dateStr = e.metadata.published || e.metadata.modified || null;
+            const itaData = e.data['ita-IT'];
+
+            const imgUrl = itaData.virtual_image && itaData.virtual_image.length > 0
+                ? baseUrl + itaData.virtual_image[0].url
+                : '/img/default.webp';
+
+            const place = itaData.virtual_takes_place_in && itaData.virtual_takes_place_in.length > 0
+                ? itaData.virtual_takes_place_in[0]
+                : {};
+
+            const dateStr = itaData.time_interval?.input?.startDateTime || e.metadata.published || e.metadata.modified;
+
             return {
                 id: e.metadata.id,
-                title: e.metadata.name?.['ita-IT'] || 'Evento Comune di Trento',
-                description: e.metadata.description?.['ita-IT']?.substring(0, 100) || 'Descrizione non disponibile',
-                images: e.images,
+                title: itaData.event_title || 'Evento Comune di Trento',
+                description: itaData.event_abstract ? itaData.event_abstract.replace(/<[^>]*>?/gm, '') : 'Descrizione non disponibile',
+                images: [imgUrl],
+                location: place.name || 'Trento',
+                coordinates: {
+                    latitude: place.latitude ? parseFloat(place.latitude) : null,
+                    longitude: place.longitude ? parseFloat(place.longitude) : null
+                },
                 source: 'trento',
                 date: dateStr ? new Date(dateStr) : new Date(0)
             };
@@ -73,25 +91,126 @@ router.get('/about', (req, res) =>{
     res.send('about');
 });
 
+router.get('/eventList',async (req, res) =>{
+    try{
+        const locals = {
+            title: "intn",
+            description: "events webapp",
+            showLayoutParts: true,
+            sidebar: 'userSidebar'
+        }
+        const now = new Date();
+        const dataDB = await Event.find({})
+            .sort({ date: 1 })
+            .exec();
+
+        const count = await Event.countDocuments({ date: { $gte: now } });
+        const apiTrento = await axios.get('https://www.comune.trento.it/api/opendata/v2/content/search/classes%20%27event%27');
+        const dataAPI = apiTrento.data.searchHits;
+
+        const userEvents = dataDB.map(e => ({
+            id: e._id,
+            title: e.title,
+            description: e.description,
+            images: e.images && e.images.length ? e.images : [e.imageUrl],
+            source: 'local',
+            date: new Date(e.date)
+        }));
+
+        const baseUrl = 'https://www.comune.trento.it';
+        const TrentoEvents = dataAPI.map(e => {
+            const itaData = e.data['ita-IT'];
+
+            const imgUrl = itaData.virtual_image && itaData.virtual_image.length > 0
+                ? baseUrl + itaData.virtual_image[0].url
+                : '/img/default.webp';
+
+            const place = itaData.virtual_takes_place_in && itaData.virtual_takes_place_in.length > 0
+                ? itaData.virtual_takes_place_in[0]
+                : {};
+
+            const dateStr = itaData.time_interval?.input?.startDateTime || e.metadata.published || e.metadata.modified;
+
+            return {
+                id: e.metadata.id,
+                title: itaData.event_title || 'Evento Comune di Trento',
+                description: itaData.event_abstract ? itaData.event_abstract.replace(/<[^>]*>?/gm, '') : 'Descrizione non disponibile',
+                images: [imgUrl],
+                location: place.name || 'Trento',
+                coordinates: {
+                    latitude: place.latitude ? parseFloat(place.latitude) : null,
+                    longitude: place.longitude ? parseFloat(place.longitude) : null
+                },
+                source: 'trento',
+                date: dateStr ? new Date(dateStr) : new Date(0)
+            };
+        });
+
+        const allEvents = [...userEvents, ...TrentoEvents];
+        allEvents.sort((a, b) => {
+            const aDiff = Math.abs(a.date - now);
+            const bDiff = Math.abs(b.date - now);
+            return aDiff - bDiff;
+        });
+
+        res.render('event/eventList', {
+            ...locals,
+            events: allEvents,
+            user: req.user
+        });
+    }catch (e) {
+        //error page
+    }
+});
+
 //EVENT PAGE
 router.get('/event/:id', async (req, res) => {
     try {
         const slug = req.params.id;
         const { DateTime } = require('luxon');
+
         if (slug.startsWith("trento-")) {
             const trentoId = slug.split("trento-")[1];
             const response = await axios.get(`https://www.comune.trento.it/api/opendata/v2/content/read/${trentoId}`);
 
             const event = response.data;
-            const title = event.metadata.name["ita-IT"] || "Evento Comune di Trento";
-            const description = event.metadata.description?.["ita-IT"] || "Nessuna descrizione disponibile";
-            const location = event.metadata.address?.["ita-IT"] || "Trento";
-            const date = event.metadata.published;
-            const formattedDate = DateTime.fromISO(date, { zone: 'utc' })
-                .setZone('Europe/Rome')
-                .toFormat("dd/MM/yyyy HH:mm");
-            const image = event.metadata.image_url || "";
-            const images = image ? [image]: [];
+            const itaData = event.data['ita-IT'];
+
+            const title = itaData?.event_title || event.metadata.name["ita-IT"] || "Evento Comune di Trento";
+
+            const description = itaData?.event_abstract
+                ? itaData.event_abstract.replace(/<[^>]*>?/gm, '')
+                : "Nessuna descrizione disponibile";
+
+            let location = "Trento";
+            let addressForMap = "Trento, Italia";
+            if (itaData.virtual_takes_place_in && itaData.virtual_takes_place_in.length > 0) {
+                const place = itaData.virtual_takes_place_in[0];
+                location = place.name || location;
+                if (place.address) {
+                    addressForMap = place.address + ", Trento, Italia";
+                } else {
+                    addressForMap = location + ", Trento, Italia";
+                }
+            }
+
+            const baseUrl = 'https://www.comune.trento.it';
+            const defaultImage = "/img/default.webp";
+            const images = itaData?.virtual_image && itaData.virtual_image.length > 0
+                ? [baseUrl + itaData.virtual_image[0].url]
+                : [defaultImage];
+
+            const dateStr = itaData?.time_interval?.input?.startDateTime || event.metadata.published || event.metadata.modified;
+
+            const formattedDate = dateStr
+                ? DateTime.fromISO(dateStr, { zone: 'utc' }).setZone('Europe/Rome').toFormat("dd/MM/yyyy HH:mm")
+                : "Data non disponibile";
+
+            let officialLink = null;
+            if (event.extradata && event.extradata['ita-IT'] && event.extradata['ita-IT'].urlAlias) {
+                officialLink = "https://www.comune.trento.it" + event.extradata['ita-IT'].urlAlias;
+            }
+
             const locals = {
                 title,
                 description,
@@ -100,11 +219,14 @@ router.get('/event/:id', async (req, res) => {
                 tag: "Comune Comunale",
                 images,
                 createdBy: "Comune di Trento",
-                createdByRole: "Ammministrazione Comunale",
+                createdByRole: "Amministrazione Comunale",
+                officialLink,
+                addressForMap,
                 verified: true,
                 showLayoutParts: true
             };
-            return res.render('event/eventAPI', { locals, data: null, mapboxToken: process.env.MAPBOX_TOKEN });
+            console.log("MAPBOX_TOKEN in backend:", process.env.MAPBOX_TOKEN);
+            return res.render('event/eventAPI', { layout: 'layouts/main', locals, data: null, mapboxToken: process.env.MAPBOX_TOKEN });
         } else {
             const data = await Event.findById(slug)
                 .populate('createdBy', 'username')
@@ -125,10 +247,9 @@ router.get('/event/:id', async (req, res) => {
                 createdByRole: data.createdByRole,
                 verified: data.verified,
                 comments: data.comments,
-                showLayoutParts: true
+                showLayoutParts: true,
             };
-            return res.render('event/event', { locals, data, user: req.user, mapboxToken: process.env.MAPBOX_TOKEN });
-            console.log("Ruolo utente al momento dell'acceso evento:", req.user.role);
+            return res.render('event/event', { layout: 'layouts/main', locals, data, user: req.user, mapboxToken: process.env.MAPBOX_TOKEN });
         }
     } catch (e) {
         console.error("Errore nella visualizzazione evento:", e.message);
@@ -152,6 +273,7 @@ router.get('/event/:id/edit', isAuthenticated, isEventOwnerOrAdmin, async (req, 
             city,
             province,
             country,
+            images: event.images,
             date: event.date.toISOString().slice(0, 16),
             tag: event.tag
         }
@@ -173,15 +295,22 @@ router.put('/event/:id/edit', isAuthenticated, isEventOwnerOrAdmin, upload.array
         data.tag = tag;
 
         if (req.files.length) {
-            data.images = req.files.map(file => '/uploads/' + file.filename);
+            const uploadPromises = req.files.map(file => cloudinary.uploader.upload(file.path));
+            const uploadResults = await Promise.all(uploadPromises);
+            const newImageUrls = uploadResults.map(result => result.secure_url);
+            data.images.push(...newImageUrls);
         }
+
 
         await data.save();
         res.redirect(`/event/${data._id}`);
         console.log("Ruolo utente al momento del post edit:", req.user.role);
+        console.log("Immagini prima della modifica:", data.images);
+        console.log("Nuove immagini caricate:", req.files.map(file => '/uploads/' + file.filename));
+
     } catch (err) {
         console.error("Errore", err);
-        res.status(500).send("Errore");
+        res.status(500).send("Errore 500");
     }
 });
 
@@ -274,7 +403,7 @@ router.post('/search', async (req, res) => {
 
         const allEvents = [...dataDB, ...dataTrento];
 
-        res.render('search', { locals, data: allEvents});
+        res.render('search', {layout: 'layouts/main', locals, data: allEvents});
     }catch (e) {
         //error page
     }

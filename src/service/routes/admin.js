@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 const passport = require('passport');
 const User = require('../models/User');
+const Event = require('../models/Event');
 const statsController = require('../controllers/statsController');
+const eventController = require('../controllers/eventController');
 
 const adminLayout = '../views/layouts/admin';
 
@@ -49,7 +51,7 @@ router.get('/logout', (req, res) => {
   });
 });
 
-//DASHBOARD ADMIN
+//DASHBOARD ADMIN - UTENTI
 
 // 0. GET - visualizza grafici utenti
 
@@ -129,5 +131,37 @@ router.post('/admin/add', async (req, res) => {
     res.status(500).json({ error: 'Errore durante la creazione utente' });
   }
 });
+
+//DASHBOARD ADMIN - EVENT
+
+router.get('/admin/eventAdministrationFull', isAdmin, async (req, res) => {
+  try {
+    const events = await Event.find().populate('createdBy', 'username').lean();
+
+    const privati = events.filter(e => e.createdByRole === 'user');
+    const impresaToVerify = events.filter(e => e.createdByRole === 'impresa' && !e.verified);
+    const impresaVerified = events.filter(e => e.createdByRole === 'impresa' && e.verified);
+    const reportedEvents = events.filter(e => e.reports && e.reports.length > 0);  // ✅ Fix: Cambiato da `reportedEvents` a `reports`
+
+    res.render('admin/eventFullAdmin', {
+      events: { privati, impresaToVerify, impresaVerified },
+      reportedEvents,  // ✅ Passato correttamente al template
+      showLayoutParts: true,
+      layout: adminLayout
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Errore caricamento pagina amministrazione');
+  }
+});
+
+
+// Rotte API per grafici eventi
+router.get('/events-by-month', isAdmin, eventController.getEventsByMonth);
+router.get('/events-by-tag', isAdmin, eventController.getEventsByTag);
+router.get('/events-verified', isAdmin, eventController.getEventsVerified);
+router.get('/events-by-role', isAdmin, eventController.getEventsByRole);
+
+
 
 module.exports = router;

@@ -72,5 +72,6 @@ app.use('/', admin);
 
 // Rotte stats
 app.use('/api/stats', admin);
+app.use('/api/event-stats', admin);
 
 module.exports = app;

@@ -11,7 +11,11 @@
 
     <div class="main-container">
         <% if (typeof showLayoutParts === 'undefined' || showLayoutParts) { %>
-            <%- include('../partials/header') %>
+            <% if (user && user.role === 'admin') { %>
+                <%- include('../partials/header_admin') %>
+            <% } else { %>
+                <%- include('../partials/header') %>
+            <% } %>
         <% } %>
 
         <main class="main">

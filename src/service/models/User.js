@@ -32,11 +32,20 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String, 
-        enum: ['user', 'enterprise', 'admin', 'comune'],
+        enum: ['user', 'company', 'admin', 'comune'],
         default: 'user'
     },
     createdAt: { 
         type: Date, default: Date.now 
+    },
+    verification: {
+        status: { type: String, enum: ['none', 'pending', 'approved', 'rejected'], default: 'none' },
+        documents: [String], // usato da aziende già registrate per upload documenti
+        companyName: String,
+        vatNumber: String,
+        address: String,
+        companyEmail: String,
+        document: String // documento del titolare o legale rappresentante (file)
     }
 });
 //HASHING DELLA PASSWORD MEDIANTE SALTING, PER NON LASCIARLA IN CHIARO

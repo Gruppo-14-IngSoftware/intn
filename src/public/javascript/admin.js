@@ -1,5 +1,3 @@
-console.log('admin.js caricato!');
-
 //visualizzazione utenti
 fetch('/admin/users')
   .then(res => res.json())

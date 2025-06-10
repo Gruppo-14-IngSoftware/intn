@@ -280,24 +280,5 @@ router.post('/search', async (req, res) => {
     }
     //res.send('index');
 });
-router.get('/admin/eventAdministrationFull', async (req, res) => {
-    try {
-        const events = await Event.find().populate('createdBy', 'username').lean();
-
-        const privati = events.filter(e => e.createdByRole === 'user');
-        const impresaToVerify = events.filter(e => e.createdByRole === 'impresa' && !e.verified);
-        const impresaVerified = events.filter(e => e.createdByRole === 'impresa' && e.verified);
-        const reportedEvents = events.filter(e => e.segnalazioni && e.segnalazioni.length > 0);
-
-        res.render('admin/eventFullAdmin', {
-            events: { privati, impresaToVerify, impresaVerified },
-            reportedEvents,
-            showLayoutParts: true
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Errore caricamento pagina amministrazione');
-    }
-});
 
 module.exports = router;

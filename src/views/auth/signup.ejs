@@ -1,53 +1,118 @@
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-sm-10 col-md-8 col-lg-6">
+            <h2 class="text-center mb-4">Registrati</h2>
 
-<head>
-    <title>Registrazione</title>
-    <link rel="stylesheet" href="/stylesheets/style.css">
-</head>
+            <% if (error && error.length > 0) { %>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <ul class="mb-0">
+                        <% error.forEach(error => { %>
+                            <li><%= error %></li>
+                        <% }) %>
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <% } %>
 
-<h1>Registrati</h1>
+            <form action="/signup" method="POST" class="bg-white border rounded-3 p-4 shadow-sm">
+                <div class="row g-2">
+                    <div class="col-sm-6">
+                        <label for="firstname" class="form-label">Nome</label>
+                        <input type="text" class="form-control" id="firstname" name="firstname"
+                               placeholder="Mario" value="Mario" required>
+                    </div>
+                    <div class="col-sm-6">
+                        <label for="lastname" class="form-label">Cognome</label>
+                        <input type="text" class="form-control" id="lastname" name="lastname"
+                               placeholder="Rossi" value="Rossi" required>
+                    </div>
+                </div>
 
-<% if (error && error.length > 0) { %>
-    <ul style="color: red;">
-        <% error.forEach(error => { %>
-            <li><%= error %></li>
-        <% }) %>
-    </ul>
-<% } %>
+                <div class="mt-3">
+                    <label for="birthdate" class="form-label">Data di nascita</label>
+                    <input type="date" class="form-control" id="birthdate" name="birthdate"
+                           value="<%= formData.birthdate || '' %>" required>
+                </div>
 
-<form action="/signup" method="POST">
-    <label for="first-name"><b>Firstname</b></label>
-    <input type="text" name="firstname" placeholder="Nome" value="<%= formData.firstname || '' %>" required><br>
+                <div class="mt-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" class="form-control" id="username" name="username"
+                           placeholder="Username" value="<%= formData.username || '' %>" required>
+                </div>
 
-    
-    <label for="last-name"><b>Lastname</b></label>
-    <input type="text" name="lastname" placeholder="Cognome" value="<%= formData.lastname || '' %>" required><br>
+                <div class="mt-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email"
+                           placeholder="email@example.com" value="<%= formData.email || '' %>" required>
+                </div>
 
-    <label for="birthdate"><b>Birthdate</b></label>
-    <input type="date" id="birthdate" name="birthdate" value="<%= formData.birthdate || '' %>" required><br>
+                <div class="mt-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password"
+                           placeholder="••••••••" required>
+                </div>
 
-    <label for="username"><b>Username</b></label>
-    <input type="text" name="username" placeholder="Username" value="<%= formData.username || '' %>" required><br>
-    
-    <label for="username"><b>Email</b></label>
-    <input type="email" name="email" placeholder="Email" value="<%= formData.email || '' %>" required><br>
-    
-    <label for="username"><b>Password</b></label>
-    <input type="password" name="password" placeholder="Password" required><br>
-    
-    <label for="username"><b>Conferma password</b></label>
-    <input type="password" name="confirmPassword" placeholder="Conferma password" required><br>
-    <button type="submit">Registrati</button>
-</form>
+                <div class="mt-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password"
+                           placeholder="••••••••" required oninput="checkPasswordStrength(this.value)">
+                    <div class="progress mt-2">
+                        <div id="password-strength-bar" class="progress-bar" role="progressbar" style="width: 0%;"></div>
+                    </div>
+                    <small id="password-strength-text" class="form-text text-muted">Inserisci una password.</small>
+                </div>
 
-<a href="/auth/google">
-    <button>Accedi con Google</button>
-</a>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">Registrati</button>
+                    <a href="/auth/google" class="btn btn-outline-danger">
+                        <i class="fab fa-google me-2"></i>Accedi con Google
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <script>
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('error')) {
         alert('Email o password errati. Riprova.');
         window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    function checkPasswordStrength(password) {
+        const strengthBar = document.getElementById('password-strength-bar');
+        const strengthText = document.getElementById('password-strength-text');
+
+        let strength = 0;
+
+        if (password.length >= 8) strength += 1;
+        if (password.match(/[a-z]/)) strength += 1;
+        if (password.match(/[A-Z]/)) strength += 1;
+        if (password.match(/[0-9]/)) strength += 1;
+        if (password.match(/[^a-zA-Z0-9]/)) strength += 1;
+
+        let barClass = 'bg-danger';
+        let text = 'Troppo debole';
+        let width = '20%';
+
+        if (strength >= 4) {
+            barClass = 'bg-success';
+            text = 'Forte';
+            width = '100%';
+        } else if (strength === 3) {
+            barClass = 'bg-warning';
+            text = 'Media';
+            width = '60%';
+        } else if (strength === 2) {
+            barClass = 'bg-info';
+            text = 'Debole';
+            width = '40%';
+        }
+
+        strengthBar.style.width = width;
+        strengthBar.className = 'progress-bar ' + barClass;
+        strengthText.innerText = text;
     }
 </script>
 

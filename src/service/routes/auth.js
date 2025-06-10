@@ -14,12 +14,11 @@ function ensureAuthenticated(req, res, next) {
 //ROUTING ALLA REGISTRAZIONE GET
 router.get('/signup', (req, res) => {
     res.render('auth/signup', {
-            title: 'Registrati',
-            error: [],
-            formData: {},
-            showLayoutParts: false
-        }
-    );
+      title: 'Registrati',
+      error: [],
+      formData: {},
+      showLayoutParts: false
+    });
 });
 
 //ROUTING ALLA REGISTRAZIONE POST CON CONTROLLO DEI DATI
@@ -42,7 +41,7 @@ router.post('/signup', async (req, res) => {
         error.push("Email o username già in uso");
     }
     if(error.length > 0) {
-        return res.render('signup', {
+        return res.render('auth/signup', {
                 title: 'Registrati',
                 error,
                 formData: {username, email},

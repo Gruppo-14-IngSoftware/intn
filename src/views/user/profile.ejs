@@ -1,154 +1,142 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-  <meta charset="UTF-8">
-  <title><%= title %></title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 600px;
-      margin: auto;
-      padding: 20px;
-    }
-    label {
-      font-weight: bold;
-    }
-    input {
-      margin-bottom: 10px;
-      width: 100%;
-      padding: 8px;
-    }
-    button {
-      margin-top: 10px;
-      padding: 10px;
-    }
-    .danger {
-      color: white;
-      background-color: red;
-      border: none;
-    }
-  </style>
+<main class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-10">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="text-center mb-4">
+            <% if (user.role === 'admin') { %>
+              Profilo Amministratore
+            <% } else if (user.role === 'company') { %>
+              Profilo Aziendale
+            <% } else { %>
+              Profilo Utente
+            <% } %>
+          </h2>
 
-  <script>
-    function abilitaModifica() {
-      document.querySelectorAll('.editable').forEach(el => el.removeAttribute('disabled'));
-      document.getElementById('salvaBtn').style.display = 'inline';
-      document.getElementById('modificaBtn').style.display = 'none';
-      document.getElementById('passwordSection').style.display = 'block';
-    }
-  </script>
-</head>
-    <% if (user && user.role === 'user') { %>
-      <hr>
-      <form action="/company/request-access" method="GET">
-        <button type="submit">Passa a profilo aziendale</button>
-      </form>
-    <% } else if (user && user.role === 'company') { %>
-      <hr>
-      <p><strong>Profilo aziendale attivo</strong></p>
-      <a href="/company/request-info">📄 Richiedi info al comune</a>
-      <% if (user.verification && user.verification.status) { %>
-        <p>Stato verifica: <strong><%= user.verification.status %></strong></p>
-      <% } %>
-    <% } %>
-<body>
-  <h1>Profilo Utente</h1>
-  <% if (user && user.verification) { %>
-    <hr>
-    <h3>Stato richiesta aziendale</h3>
-    <% if (user.verification.status === 'pending') { %>
-      <p>⏳ Richiesta in attesa di approvazione</p>
-    <% } else if (user.verification.status === 'approved') { %>
-      <p>✅ Profilo aziendale approvato</p>
-    <% } else if (user.verification.status === 'rejected') { %>
-      <p>❌ Richiesta rifiutata. Puoi inviarne una nuova</p>
-    <% } else if (user.verification.status === 'blocked') { %>
-      <p>🚫 La tua richiesta è stata bloccata. Non puoi inviarne altre da questo account.</p>
-    <% } %>
-  <% } %>
+          <div class="mb-4">
+            <p><strong>Nome:</strong> <%= user.firstname %></p>
+            <p><strong>Cognome:</strong> <%= user.lastname %></p>
+            <p><strong>Email:</strong> <%= user.email %></p>
+            <p><strong>Username:</strong> <%= user.username %></p>
+            <p><strong>Ruolo:</strong> <span class="badge bg-secondary"><%= user.role %></span></p>
+          </div>
 
-  <form action="/profile/update" method="POST">
-    <label>Nome:</label>
-    <input type="text" name="firstname" class="editable" value="<%= user.firstname %>" disabled required>
+          <% if (user.role === 'user') { %>
+            <div class="alert alert-info">Sei registrato come utente. Puoi iscriverti agli eventi pubblici e fare richiesta per accedere come azienda.</div>
+            <a href="/company/request-access" class="btn btn-outline-primary mb-3">Richiedi accesso azienda</a>
+          <% } else if (user.role === 'company') { %>
+            <div class="alert alert-success">Profilo aziendale attivo</div>
+            <a href="/company/request-info" class="btn btn-outline-secondary mb-3">Richiedi info al Comune</a>
+            <% if (user.verification && user.verification.status) { %>
+              <p>Stato verifica: <strong><%= user.verification.status %></strong></p>
+            <% } %>
+          <% } else if (user.role === 'admin') { %>
+            <div class="alert alert-warning">
+              Accesso amministratore attivo. Puoi accedere alle sezioni di gestione:
 
-    <label>Cognome:</label>
-    <input type="text" name="lastname" class="editable" value="<%= user.lastname %>" disabled required>
+              <ul class="list-unstyled mt-2">
+                <li><a href="/admin/dashboard" class="btn btn-outline-dark btn-sm my-1">📊 Dashboard Admin</a></li>
+                <li><a href="/admin/verify-companies" class="btn btn-outline-primary btn-sm my-1">✅ Verifica aziende</a></li>
+                <li><a href="/admin/info-requests" class="btn btn-outline-info btn-sm my-1">📩 Richieste informazioni</a></li>
+              </ul>
+            </div>
+          <% } %>
 
-    <label>Email:</label>
-    <input type="email" name="email" class="editable" value="<%= user.email %>" disabled required>
+          <hr>
 
-    <label>Username:</label>
-    <input type="text" name="username" class="editable" value="<%= user.username %>" disabled required>
+          <form action="/profile/update" method="POST">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Nome</label>
+                <input type="text" class="form-control editable" name="firstname" value="<%= user.firstname %>" disabled required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Cognome</label>
+                <input type="text" class="form-control editable" name="lastname" value="<%= user.lastname %>" disabled required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control editable" name="email" value="<%= user.email %>" disabled required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Username</label>
+                <input type="text" class="form-control editable" name="username" value="<%= user.username %>" disabled required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Data di nascita</label>
+                <input type="date" class="form-control" value="<%= user.birthdate.toISOString().substring(0, 10) %>" disabled>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Password (criptata)</label>
+                <input type="password" class="form-control" value="<%= user.password %>" disabled>
+              </div>
+            </div>
 
-    <label>Data di nascita:</label>
-    <input type="date" value="<%= user.birthdate.toISOString().substring(0, 10) %>" disabled>
+            <div id="passwordSection" class="mt-4" style="display: none;">
+              <h5>Cambia password</h5>
+              <input type="password" class="form-control my-2" name="currentPassword" placeholder="Password attuale">
+              <input type="password" class="form-control my-2" name="newPassword" placeholder="Nuova password">
+              <input type="password" class="form-control my-2" name="confirmNewPassword" placeholder="Conferma nuova password">
+            </div>
 
-    <label>Password (criptata):</label>
-    <input type="password" value="<%= user.password %>" disabled>
+            <div class="d-flex justify-content-between align-items-center mt-4">
+              <button type="button" class="btn btn-warning" id="modificaBtn" onclick="abilitaModifica()">Modifica profilo</button>
+              <button type="submit" class="btn btn-success" id="salvaBtn" style="display: none;">Salva modifiche</button>
+            </div>
+          </form>
 
-    <!-- SEZIONE CAMBIO PASSWORD -->
-    <div id="passwordSection" style="display: none;">
-      <hr>
-      <h3>Cambia password</h3>
+          <hr>
 
-      <label>Password attuale:</label>
-      <input type="password" name="currentPassword">
+          <div class="d-flex justify-content-between">
+            <form action="/logout" method="GET">
+              <button class="btn btn-outline-dark">Logout</button>
+            </form>
 
-      <label>Nuova password:</label>
-      <input type="password" name="newPassword">
+            <form action="/profile/delete" method="POST" onsubmit="return confirm('Sei sicuro? Questa azione è irreversibile.')">
+              <button type="submit" class="btn btn-danger">Elimina account</button>
+            </form>
+          </div>
+        </div>
+      </div>
 
-      <label>Conferma nuova password:</label>
-      <input type="password" name="confirmNewPassword">
+      <div class="mt-5">
+        <h3>🟢 Eventi creati</h3>
+        <% if (user.createdEvents.length === 0) { %>
+          <p>Nessun evento creato.</p>
+        <% } else { %>
+          <ul class="list-group mb-4">
+            <% user.createdEvents.forEach(e => { %>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <a href="/event/<%= e._id %>"><%= e.title %></a>
+                <span class="badge bg-secondary"><%= new Date(e.date).toLocaleDateString() %></span>
+              </li>
+            <% }) %>
+          </ul>
+        <% } %>
+
+        <h3>🔵 Eventi partecipati</h3>
+        <% if (user.subscribedEventsData.length === 0) { %>
+          <p>Nessuna iscrizione attiva.</p>
+        <% } else { %>
+          <ul class="list-group">
+            <% user.subscribedEventsData.forEach(e => { %>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <a href="/event/<%= e._id %>"><%= e.title %></a>
+                <span class="badge bg-light text-dark">Privato</span>
+              </li>
+            <% }) %>
+          </ul>
+        <% } %>
+      </div>
     </div>
+  </div>
+</main>
 
-    <button type="button" id="modificaBtn" onclick="abilitaModifica()">Modifica profilo</button>
-    <button type="submit" id="salvaBtn" style="display: none;">Salva modifiche</button>
-  </form>
-
-  <hr>
-
-  <form action="/logout" method="GET">
-    <button type="submit">Logout</button>
-  </form>
-
-  <hr>
-
-  <form action="/profile/delete" method="POST" onsubmit="return confirm('Sei sicuro di voler eliminare il tuo account? Questa azione è irreversibile.')">
-    <button type="submit" class="danger">Elimina account</button>
-  </form>
-
-    <hr>
-
-  <h2>Storico Eventi</h2>
-
-  <h3>🟢 Eventi creati da te</h3>
-  <% if (user.createdEvents?.length === 0) { %>
-    <p>Non hai creato eventi.</p>
-  <% } else { %>
-    <ul>
-      <% user.createdEvents.forEach(e => { %>
-        <li>
-          <a href="/event/<%= e._id %>"><strong><%= e.title %></strong></a>
-          – <%= e.date.toLocaleDateString() %>
-        </li>
-      <% }) %>
-    </ul>
-  <% } %>
-
-  <h3>🔵 Eventi a cui sei iscritto</h3>
-  <% if (user.subscribedEventsData?.length === 0) { %>
-    <p>Non sei iscritto a nessun evento.</p>
-  <% } else { %>
-    <ul>
-      <% user.subscribedEventsData.forEach(e => { %>
-        <li>
-          <a href="/event/<%= e._id %>"><strong><%= e.title %></strong></a>
-          – <%= e.date.toLocaleDateString() %>
-          <span style="color: gray;">(accesso privato)</span>
-        </li>
-      <% }) %>
-    </ul>
-  <% } %>
-
-</body>
-</html>
+<script>
+  function abilitaModifica() {
+    document.querySelectorAll('.editable').forEach(el => el.removeAttribute('disabled'));
+    document.getElementById('salvaBtn').style.display = 'inline-block';
+    document.getElementById('modificaBtn').style.display = 'none';
+    document.getElementById('passwordSection').style.display = 'block';
+  }
+</script>

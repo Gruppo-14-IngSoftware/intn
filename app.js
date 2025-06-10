@@ -15,6 +15,7 @@ const { storage } = require('./src/service/utilities/cloudinary');
 const eventsRouter = require('./src/service/routes/event');
 const methodOverride = require('method-override');
 const cors = require('cors');
+const companyRoutes = require('./src/service/routes/company');
 
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
@@ -69,6 +70,7 @@ app.use('/', main);
 app.use('/', authRoutes);
 app.use('/events', eventsRouter);
 app.use('/', admin);
+app.use('/company', companyRoutes);
 
 // Rotte stats
 app.use('/api/stats', admin);

@@ -1,15 +1,30 @@
 <%- include('../partials/header') %>
 
-<h2>Richiedi informazioni al comune</h2>
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-10 col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="text-center mb-4">Richiedi informazioni al Comune</h2>
 
-<% if (message) { %>
-  <p><%= message %></p>
-<% } %>
+          <% if (message) { %>
+            <div class="alert alert-info text-center"><%= message %></div>
+          <% } %>
 
-<form method="POST" action="/company/request-info">
-  <label for="message">Scrivi la tua richiesta:</label><br>
-  <textarea name="message" id="message" rows="6" style="width: 100%;" required></textarea><br><br>
-  <button type="submit">Invia richiesta</button>
-</form>
+          <form method="POST" action="/company/request-info">
+            <div class="mb-3">
+              <label for="message" class="form-label">Scrivi la tua richiesta</label>
+              <textarea name="message" id="message" rows="6" class="form-control" required placeholder="Scrivi qui la tua domanda..."></textarea>
+            </div>
+
+            <div class="d-grid">
+              <button type="submit" class="btn btn-primary">Invia richiesta</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <%- include('../partials/footer') %>

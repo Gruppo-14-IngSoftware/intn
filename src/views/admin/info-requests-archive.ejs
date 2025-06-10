@@ -1,0 +1,21 @@
+<%- include('../partials/header') %>
+
+<h2>Archivio Richieste Aziendali</h2>
+
+<% if (archived.length === 0) { %>
+  <p>Nessuna richiesta archiviata.</p>
+<% } else { %>
+  <% archived.forEach(r => { %>
+    <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
+      <strong><%= r.company.firstname %> <%= r.company.lastname %> - <%= r.company.email %></strong>
+      <p><strong>Messaggio:</strong></p>
+      <pre><%= r.message %></pre>
+      <small>Data: <%= r.createdAt.toLocaleString() %></small>
+      <form method="POST" action="/admin/info-requests/<%= r._id %>/reopen" style="display:inline;">
+        <button type="submit">🔄 Ripristina</button>
+      </form>
+    </div>
+  <% }) %>
+<% } %>
+
+<%- include('../partials/footer') %>

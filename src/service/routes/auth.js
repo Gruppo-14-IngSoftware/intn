@@ -3,6 +3,9 @@ const router = express.Router();
 const passport = require('passport');
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
+const Event = require('../models/Event');
+const { isAuthenticated } = require('../middlewares/auth');
+
 
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) return next();
@@ -96,19 +99,25 @@ router.get('/logout', (req, res, next) => {
 });
 
 //Questa rotta carica la pagina profile.ejs e passa i dati dell’utente loggato
-router.get('/profile', ensureAuthenticated, async (req, res) => {
+router.get('/profile', isAuthenticated, async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    const createdEvents = await Event.find({ createdBy: req.user._id }).sort({ date: -1 });
+    const subscribedEventsData = await Event.find({ _id: { $in: req.user.subscribedEvents } }).sort({ date: -1 });
+
     res.render('user/profile', {
-      user,
       title: 'Profilo utente',
-      showLayoutParts: true
+      user: {
+        ...req.user.toObject(),
+        createdEvents,
+        subscribedEventsData
+      }
     });
   } catch (err) {
     console.error(err);
-    res.status(500).send('Errore nel caricamento del profilo');
+    res.status(500).send('Errore nel caricamento profilo');
   }
 });
+
 
 //Quando viene effettuato l'update aggiorna i dati dell’utente nel DB (compreso di change psw)
 router.post('/profile/update', ensureAuthenticated, async (req, res) => {
@@ -185,6 +194,30 @@ router.post('/profile/delete', ensureAuthenticated, async (req, res, next) => {
   } catch (err) {
     console.error(err);
     res.status(500).send("Errore durante l'eliminazione dell'account");
+  }
+});
+
+// Event user history
+router.get('/event/:id', async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id).populate('createdBy');
+    if (!event) return res.status(404).send('Evento non trovato');
+
+    const isCreator = req.user && event.createdBy.equals(req.user._id);
+    const isSubscribed = req.user && req.user.subscribedEvents.includes(event._id.toString());
+
+    // Accesso consentito solo se:
+    const accessGranted =
+      event.createdByRole === 'user' || // evento pubblico
+      isCreator ||                      // o sei il creatore
+      isSubscribed;                     // o sei iscritto
+
+    if (!accessGranted) return res.status(403).send('Non hai accesso a questo evento.');
+
+    res.render('event/show', { event, user: req.user });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Errore caricamento evento');
   }
 });
 

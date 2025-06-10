@@ -25,7 +25,15 @@ async function isEventOwnerOrAdmin(req, res, next) {
     }
 }
 
+function isCompany(req, res, next) {
+    if (req.user && req.user.role === 'company') {
+        return next();
+    }
+    res.status(403).send('Accesso negato. Solo aziende possono accedere.');
+}
+
 module.exports = {
     isAuthenticated,
-    isEventOwnerOrAdmin
+    isEventOwnerOrAdmin,
+    isCompany
 };

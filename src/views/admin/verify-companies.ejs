@@ -1,0 +1,50 @@
+<%- include('../partials/header') %>
+
+<h2>Richieste profilo aziendale</h2>
+
+<% if (requests.length === 0) { %>
+  <p>Nessuna richiesta in attesa.</p>
+<% } else { %>
+  <table>
+    <thead>
+      <tr>
+        <th>Utente</th>
+        <th>Ragione Sociale</th>
+        <th>P.IVA</th>
+        <th>Email</th>
+        <th>Documento</th>
+        <th>Azioni</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% requests.forEach(r => { %>
+        <tr>
+          <td><%= r.firstname %> <%= r.lastname %> (<%= r.email %>)</td>
+          <td><%= r.verification.companyName %></td>
+          <td><%= r.verification.vatNumber %></td>
+          <td><%= r.verification.companyEmail %></td>
+          <td>
+            <% if (r.verification.document) { %>
+              <a href="<%= r.verification.document %>" target="_blank">Visualizza</a>
+            <% } else { %>
+              Nessun documento
+            <% } %>
+          </td>
+          <td>
+            <form action="/admin/verify-companies/<%= r._id %>/approve" method="POST" style="display:inline;">
+              <button type="submit">✅ Approva</button>
+            </form>
+            <form action="/admin/verify-companies/<%= r._id %>/reject" method="POST" style="display:inline;">
+              <button type="submit">❌ Rifiuta</button>
+            </form>
+            <form action="/admin/verify-companies/<%= r._id %>/block" method="POST" style="display:inline;">
+              <button type="submit">🚫 Blocca richiesta</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+<% } %>
+
+<%- include('../partials/footer') %>

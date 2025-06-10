@@ -1,21 +1,33 @@
 <%- include('../partials/header') %>
 
-<h2>Archivio Richieste Aziendali</h2>
+<div class="container py-5">
+  <h2 class="mb-4 text-center">🗂️ Archivio Richieste Aziendali</h2>
 
-<% if (archived.length === 0) { %>
-  <p>Nessuna richiesta archiviata.</p>
-<% } else { %>
-  <% archived.forEach(r => { %>
-    <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
-      <strong><%= r.company.firstname %> <%= r.company.lastname %> - <%= r.company.email %></strong>
-      <p><strong>Messaggio:</strong></p>
-      <pre><%= r.message %></pre>
-      <small>Data: <%= r.createdAt.toLocaleString() %></small>
-      <form method="POST" action="/admin/info-requests/<%= r._id %>/reopen" style="display:inline;">
-        <button type="submit">🔄 Ripristina</button>
-      </form>
-    </div>
-  <% }) %>
-<% } %>
+  <div class="text-end mb-4">
+    <a href="/admin/info-requests" class="btn btn-outline-primary">⬅️ Torna alle richieste attive</a>
+  </div>
+
+  <% if (archived.length === 0) { %>
+    <div class="alert alert-info text-center">Nessuna richiesta archiviata.</div>
+  <% } else { %>
+    <% archived.forEach(r => { %>
+      <div class="card mb-4 shadow-sm">
+        <div class="card-header">
+          <strong><%= r.company.firstname %> <%= r.company.lastname %></strong>
+          <span class="text-muted float-end"><%= r.company.email %></span>
+        </div>
+        <div class="card-body">
+          <p><strong>Messaggio:</strong></p>
+          <pre class="bg-light border rounded p-2"><%= r.message %></pre>
+          <p class="text-muted"><small>Inviato il: <%= new Date(r.createdAt).toLocaleString() %></small></p>
+
+          <form method="POST" action="/admin/info-requests/<%= r._id %>/reopen">
+            <button type="submit" class="btn btn-outline-success">🔄 Ripristina richiesta</button>
+          </form>
+        </div>
+      </div>
+    <% }) %>
+  <% } %>
+</div>
 
 <%- include('../partials/footer') %>

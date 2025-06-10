@@ -1,38 +1,52 @@
 <%- include('../partials/header') %>
 
-<h2>Richiesta Profilo Aziendale</h2>
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-10 col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h2 class="text-center mb-4">Richiesta Profilo Aziendale</h2>
 
-<% if (message) { %>
-  <div class="alert alert-info"><%= message %></div>
-<% } %>
+          <% if (message) { %>
+            <div class="alert alert-info text-center"><%= message %></div>
+          <% } %>
 
-<form action="/company/request-access" method="POST" enctype="multipart/form-data">
-  <div class="form-group">
-    <label for="companyName">Ragione Sociale</label>
-    <input type="text" name="companyName" required class="form-control">
+          <form action="/company/request-access" method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+              <label for="companyName" class="form-label">Ragione Sociale</label>
+              <input type="text" name="companyName" id="companyName" required class="form-control">
+            </div>
+
+            <div class="mb-3">
+              <label for="vatNumber" class="form-label">Partita IVA</label>
+              <input type="text" name="vatNumber" id="vatNumber" required class="form-control">
+              <div class="form-text">Inserisci 11 cifre numeriche</div>
+            </div>
+
+            <div class="mb-3">
+              <label for="address" class="form-label">Indirizzo Sede</label>
+              <input type="text" name="address" id="address" required class="form-control">
+            </div>
+
+            <div class="mb-3">
+              <label for="companyEmail" class="form-label">Email Aziendale</label>
+              <input type="email" name="companyEmail" id="companyEmail" required class="form-control">
+            </div>
+
+            <div class="mb-4">
+              <label for="identityDoc" class="form-label">Documento del titolare (PDF o immagine)</label>
+              <input type="file" name="identityDoc" id="identityDoc" accept=".pdf,.jpg,.jpeg,.png" required class="form-control">
+              <div class="form-text">Accettiamo PDF o immagini (JPG/PNG)</div>
+            </div>
+
+            <div class="d-grid">
+              <button type="submit" class="btn btn-success">Invia richiesta</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
-
-  <div class="form-group">
-    <label for="vatNumber">Partita IVA</label>
-    <input type="text" name="vatNumber" required class="form-control">
-  </div>
-
-  <div class="form-group">
-    <label for="address">Indirizzo Sede</label>
-    <input type="text" name="address" required class="form-control">
-  </div>
-
-  <div class="form-group">
-    <label for="companyEmail">Email Aziendale</label>
-    <input type="email" name="companyEmail" required class="form-control">
-  </div>
-
-  <div class="form-group">
-    <label for="identityDoc">Documento del titolare (PDF o immagine)</label>
-    <input type="file" name="identityDoc" accept=".pdf,.jpg,.jpeg,.png" required class="form-control">
-  </div>
-
-  <button type="submit" class="btn btn-success mt-3">Invia richiesta</button>
-</form>
+</div>
 
 <%- include('../partials/footer') %>

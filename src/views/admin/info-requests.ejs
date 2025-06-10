@@ -1,49 +1,60 @@
 <%- include('../partials/header') %>
 
-<h2>Richieste Informative dalle Aziende</h2>
+<div class="container py-5">
+  <h2 class="mb-4 text-center">📩 Richieste Informative dalle Aziende</h2>
 
-<% if (success_msg) { %>
-  <div class="alert alert-success"><%= success_msg %></div>
-<% } %>
-<% if (error_msg) { %>
-  <div class="alert alert-danger"><%= error_msg %></div>
-<% } %>
-
-<p><a href="/admin/info-requests/archive">📁 Vai all’archivio richieste</a></p>
+  <% if (Array.isArray(success_msg) && success_msg.length > 0) { %>
+    <div class="alert alert-success text-center"><%= success_msg[0] %></div>
+  <% } %>
+  <% if (Array.isArray(error_msg) && error_msg.length > 0) { %>
+    <div class="alert alert-danger text-center"><%= error_msg[0] %></div>
+  <% } %>
 
 
-<% if (requests.length === 0) { %>
-  <p>Nessuna richiesta aperta.</p>
-<% } else { %>
-  <% requests.forEach(r => { %>
-    <div class="request-preview" style="border: 1px solid #ccc; padding: 15px; margin-bottom: 15px;">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <strong><%= r.company.firstname %> <%= r.company.lastname %></strong>
-        <button onclick="toggleMsg('<%= r._id %>')" id="toggle-btn-<%= r._id %>">👁️ Mostra</button>
+  <div class="text-end mb-3">
+    <a href="/admin/info-requests/archive" class="btn btn-outline-secondary">
+      📁 Vai all’archivio richieste
+    </a>
+  </div>
+
+  <% if (requests.length === 0) { %>
+    <div class="alert alert-info text-center">Nessuna richiesta aperta.</div>
+  <% } else { %>
+    <% requests.forEach(r => { %>
+      <div class="card mb-4 shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <strong><%= r.company.firstname %> <%= r.company.lastname %></strong>
+          <button class="btn btn-sm btn-outline-primary" onclick="toggleMsg('<%= r._id %>')" id="toggle-btn-<%= r._id %>">
+            👁️ Mostra
+          </button>
+        </div>
+
+        <div class="card-body" id="msg-<%= r._id %>" style="display: none;">
+          <p><strong>Email:</strong> <%= r.company.email %></p>
+          <p><strong>Messaggio:</strong></p>
+          <pre class="bg-light p-2 border rounded"><%= r.message %></pre>
+
+          <form method="POST" action="/admin/info-requests/<%= r._id %>/send" class="mb-3">
+            <label for="replyMessage" class="form-label">Risposta via email:</label>
+            <textarea name="replyMessage" rows="4" required class="form-control mb-2" placeholder="Scrivi la tua risposta..."></textarea>
+            <button type="submit" class="btn btn-success">📤 Invia risposta</button>
+          </form>
+
+          <div class="d-flex gap-2">
+            <form method="POST" action="/admin/info-requests/<%= r._id %>/archive">
+              <button type="submit" class="btn btn-outline-secondary">📦 Archivia</button>
+            </form>
+
+            <form method="POST" action="/admin/info-requests/<%= r._id %>/delete"
+                  onsubmit="return confirm('Sei sicuro di voler eliminare questa richiesta?');">
+              <button type="submit" class="btn btn-outline-danger">🗑️ Elimina</button>
+            </form>
+          </div>
+        </div>
       </div>
-
-      <div class="request-full" id="msg-<%= r._id %>" style="display: none; margin-top: 10px;">
-        <p><strong>Email:</strong> <%= r.company.email %></p>
-        <p><strong>Messaggio:</strong></p>
-        <pre><%= r.message %></pre>
-
-        <form method="POST" action="/admin/info-requests/<%= r._id %>/send">
-          <label for="replyMessage">Risposta via email:</label><br>
-          <textarea name="replyMessage" rows="4" required style="width: 100%;"></textarea><br><br>
-          <button type="submit">📤 Invia risposta</button>
-        </form>
-
-        <form method="POST" action="/admin/info-requests/<%= r._id %>/archive" style="display:inline;">
-          <button type="submit">📦 Archivia</button>
-        </form>
-
-        <form method="POST" action="/admin/info-requests/<%= r._id %>/delete" style="display:inline;" onsubmit="return confirm('Sei sicuro di voler eliminare questa richiesta?');">
-          <button type="submit">🗑️ Elimina</button>
-        </form>
-      </div>
-    </div>
-  <% }) %>
-<% } %>
+    <% }) %>
+  <% } %>
+</div>
 
 <script>
   function toggleMsg(id) {

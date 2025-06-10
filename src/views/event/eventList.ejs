@@ -1,0 +1,34 @@
+<div class="event-section-title">
+    <h2>Lista eventi:</h2>
+</div>
+<% events.forEach(event => { %>
+    <a class="containerEvent" href="/event/<%= event.source === 'trento' ? 'trento-' + event.id : event.id %>">
+        <div class="event">
+            <img src="<%=
+                event.images && event.images.length
+                        ? event.images[0]
+                        : (event.image || '/img/default.webp')
+            %>" alt="Evento" class="eventImg">
+            <div class="eventDetails">
+                <h2 class="eventTitle"><%= event.title %></h2>
+                <p class="eventLocation"><%= event.description %></p>
+                <p class="eventDate"><%= event.date.toLocaleDateString('it-IT', {
+                        day: '2-digit', month: 'short', year: 'numeric'
+                    }) %></p>
+            </div>
+        </div>
+    </a>
+<% }) %>
+
+
+
+
+
+
+
+
+
+
+
+
+

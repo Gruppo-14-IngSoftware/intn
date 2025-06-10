@@ -16,28 +16,6 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// GET verifica
-router.get('/verify', isAuthenticated, isCompany, (req, res) => {
-  res.render('company/verify', { user: req.user, message: null });
-});
-
-// POST verifica
-router.post('/verify', isAuthenticated, isCompany, upload.array('documents'), async (req, res) => {
-  try {
-    const files = req.files.map(f => '/uploads/' + f.filename);
-
-    req.user.verification = {
-      status: 'pending',
-      documents: files
-    };
-    await req.user.save();
-
-    res.render('company/verify', { user: req.user, message: 'Richiesta inviata con successo' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).render('company/verify', { user: req.user, message: 'Errore durante l’invio' });
-  }
-});
 
 // GET richiesta accesso azienda (solo utenti normali)
 router.get('/request-access', isAuthenticated, (req, res) => {

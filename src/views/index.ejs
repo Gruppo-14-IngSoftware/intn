@@ -1,77 +1,9 @@
-<!-- INDEX HOMEPAGE PAGINA PRINCIPALE -->
-<link rel="canonical" href="https://getbootstrap.com/docs/5.0/examples/carousel/">
-<link href="/stylesheets/bootstrap.min.css" rel="stylesheet">
-<style>
-    .bd-placeholder-img {
-        font-size: 1.125rem;
-        text-anchor: middle;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        user-select: none;
-    }
-
-    @media (min-width: 768px) {
-        .bd-placeholder-img-lg {
-            font-size: 3.5rem;
-        }
-    }
-</style>
-<!-- CAROSELLO SCORRIMENTO IMMAGINI -->
-<link href="/stylesheets/carousel.css" rel="stylesheet">
-<div id="myCarousel" class="carousel slide" data-bs-ride="carousel">
-    <div class="carousel-indicators">
-        <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-        <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
-        <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
-    </div>
-    <div class="carousel-inner">
-        <div class="carousel-item active">
-            <svg class="bd-placeholder-img" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="xMidYMid slice" focusable="false"><rect width="100%" height="100%" fill="#777"/></svg>
-
-            <div class="container">
-                <div class="carousel-caption text-start">
-                    <h1>Example headline.</h1>
-                    <p>Some representative placeholder content for the first slide of the carousel.</p>
-                    <p><a class="btn btn-lg btn-primary" href="#">Sign up today</a></p>
-                </div>
-            </div>
-        </div>
-        <div class="carousel-item">
-            <svg class="bd-placeholder-img" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="xMidYMid slice" focusable="false"><rect width="100%" height="100%" fill="#777"/></svg>
-
-            <div class="container">
-                <div class="carousel-caption">
-                    <h1>Another example headline.</h1>
-                    <p>Some representative placeholder content for the second slide of the carousel.</p>
-                    <p><a class="btn btn-lg btn-primary" href="#">Learn more</a></p>
-                </div>
-            </div>
-        </div>
-        <div class="carousel-item">
-            <svg class="bd-placeholder-img" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="xMidYMid slice" focusable="false"><rect width="100%" height="100%" fill="#777"/></svg>
-
-            <div class="container">
-                <div class="carousel-caption text-end">
-                    <h1>One more for good measure.</h1>
-                    <p>Some representative placeholder content for the third slide of this carousel.</p>
-                    <p><a class="btn btn-lg btn-primary" href="#">Browse gallery</a></p>
-                </div>
-            </div>
-        </div>
-    </div>
-    <button class="carousel-control-prev" type="button" data-bs-target="#myCarousel" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Previous</span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#myCarousel" data-bs-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Next</span>
-    </button>
+<div class="event-section-title">
+    <h2>Eventi in evidenza</h2>
 </div>
-<<% events.forEach(event => { %>
+<% events.forEach(event => { %>
     <a class="containerEvent" href="/event/<%= event.source === 'trento' ? 'trento-' + event.id : event.id %>">
         <div class="event">
-            <img src="<%= event.imageUrl %>" alt="event image">
             <div class="eventDetails">
                 <h2 class="eventTitle"><%= event.title %></h2>
                 <p class="eventLocation"><%= event.description %></p>
@@ -83,15 +15,20 @@
     </a>
 <% }) %>
 <!--INDICATORE NUMERICO DELLA PAGINA CORRENTE-->
-<div class="pagination">
-    <% if (current > 1) { %>
-        <a href="/?page=<%= current - 1 %>">&lt; Newer events</a>
-    <% } %>
+<nav aria-label="Event navigation">
+    <ul class="pagination justify-content-center mt-4">
+        <% if (current > 1) { %>
+            <li class="page-item">
+                <a class="page-link" href="/?page=<%= current - 1 %>" tabindex="-1" aria-disabled="true"> &lt; Nuovi eventi</a>
+            </li>
+        <% } %>
+        <% if (nextPage !== null) { %>
+            <li class="page-item">
+                <a class="page-link" href="/?page=<%= nextPage %>"> Vecchi eventi &gt;</a>
+            </li>
+        <% } %>
+    </ul>
+</nav>
 
-    <% if (nextPage !== null) { %>
-        <a href="/?page=<%= nextPage %>">Older events &gt;</a>
-    <% } %>
-</div>
 
-<script src="javascript/bootstrap.bundle.min.js"></script>
 

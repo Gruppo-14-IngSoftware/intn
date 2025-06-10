@@ -1,0 +1,38 @@
+<%- include('../partials/header') %>
+
+<h2>Richiesta Profilo Aziendale</h2>
+
+<% if (message) { %>
+  <div class="alert alert-info"><%= message %></div>
+<% } %>
+
+<form action="/company/request-access" method="POST" enctype="multipart/form-data">
+  <div class="form-group">
+    <label for="companyName">Ragione Sociale</label>
+    <input type="text" name="companyName" required class="form-control">
+  </div>
+
+  <div class="form-group">
+    <label for="vatNumber">Partita IVA</label>
+    <input type="text" name="vatNumber" required class="form-control">
+  </div>
+
+  <div class="form-group">
+    <label for="address">Indirizzo Sede</label>
+    <input type="text" name="address" required class="form-control">
+  </div>
+
+  <div class="form-group">
+    <label for="companyEmail">Email Aziendale</label>
+    <input type="email" name="companyEmail" required class="form-control">
+  </div>
+
+  <div class="form-group">
+    <label for="identityDoc">Documento del titolare (PDF o immagine)</label>
+    <input type="file" name="identityDoc" accept=".pdf,.jpg,.jpeg,.png" required class="form-control">
+  </div>
+
+  <button type="submit" class="btn btn-success mt-3">Invia richiesta</button>
+</form>
+
+<%- include('../partials/footer') %>

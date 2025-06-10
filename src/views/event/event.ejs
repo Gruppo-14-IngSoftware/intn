@@ -64,12 +64,11 @@
                 </a>
             </div>
 
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-1" style="gap: 2px;">
                 <!-- Condivisione -->
                 <% if (data && data._id) { %>
                     <div>
-                        <button type="button" class="btn btn-outline-secondary" onclick="toggleShareMenu()" title="Condividi evento">
+                        <button type="button" class="btn btn-outline-secondary me-1" onclick="toggleShareMenu()" title="Condividi evento">
                             <i class="fa-solid fa-share-nodes"></i>
                         </button>
                         <div id="shareMenu" style="display: none; padding-top: 10px;">
@@ -92,7 +91,7 @@
                 <!-- Segnala -->
                 <% if (user) { %>
                     <form action="/event/<%= data._id %>/report" method="POST">
-                        <button type="submit" class="btn btn-outline-danger">
+                        <button type="submit" class="btn btn-outline-danger me-1">
                             <i class="fa-solid fa-flag"></i> Segnala evento
                         </button>
                     </form>
@@ -100,13 +99,13 @@
 
                 <!-- Modifica -->
                 <% if (user && data && (user._id.toString() === data.createdBy._id.toString() || user.role === 'admin')) { %>
-                    <a href="/event/<%= data._id %>/edit" class="btn btn-outline-secondary">
+                    <a href="/event/<%= data._id %>/edit" class="btn btn-outline-secondary me-1">
                         <i class="fa-solid fa-pen-to-square"></i> Modifica
                     </a>
 
                     <!-- Elimina -->
                     <form id="deleteForm" action="/event/<%= data._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Sei sicuro di voler eliminare questo evento?')">
-                        <button type="submit" class="btn btn-outline-danger">
+                        <button type="submit" class="btn btn-outline-danger me-1">
                             <i class="fa-solid fa-trash"></i> Elimina
                         </button>
                     </form>

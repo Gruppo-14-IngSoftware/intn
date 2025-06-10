@@ -1,4 +1,4 @@
-const Event = require('../models/event');
+const Event = require('../models/Event');
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
@@ -121,7 +121,7 @@ router.post('/create-public', upload.array('image', 5), async (req, res) => {
         console.log('Cloudinary config:', process.env.CLOUD_NAME, process.env.CLOUD_API_KEY);
     }
 });
-router.post('/event/:id/subscribe', async (req, res) => {
+router.post('/:id/subscribe', async (req, res) => {
     if (!req.user) return res.redirect('/login');
 
     try {
@@ -150,7 +150,7 @@ router.post('/event/:id/subscribe', async (req, res) => {
     }
 });
 
-router.post('/event/:id/unsubscribe', async (req, res) => {
+router.post('/:id/unsubscribe', async (req, res) => {
     if (!req.user) return res.status(401).send("Non autenticato");
 
     try {
@@ -164,11 +164,13 @@ router.post('/event/:id/unsubscribe', async (req, res) => {
         res.status(500).send("Errore durante la disiscrizione");
     }
 });
-router.post('/event/:id/report', async (req, res) => {
+
+router.post('/:id/report', async (req, res) => {
     try {
         if (!req.user) {
             return res.status(401).send('Devi essere autenticato per segnalare un evento.');
         }
+
         const eventId = req.params.id;
         const userId = req.user._id;
         const username = req.user.username;
@@ -176,12 +178,12 @@ router.post('/event/:id/report', async (req, res) => {
         const event = await Event.findById(eventId);
         if (!event) return res.status(404).send('Evento non trovato.');
 
-        const alreadyReported = event.segnalazioni.some(s => s.userId.equals(userId));
+        const alreadyReported = event.reports.some(r => r.userId.equals(userId));
         if (alreadyReported) {
             return res.status(400).send('Hai già segnalato questo evento.');
         }
 
-        event.segnalazioni.push({ userId, username });
+        event.reports.push({ userId, username });
         await event.save();
 
         res.redirect(`/event/${eventId}`);
@@ -190,6 +192,7 @@ router.post('/event/:id/report', async (req, res) => {
         res.status(500).send('Errore durante la segnalazione.');
     }
 });
+
 
 async function notifySubscribers(eventId, newData) {
     const event = await Event.findById(eventId);

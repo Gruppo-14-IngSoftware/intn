@@ -6,7 +6,6 @@ const User = require('../models/User');
 const Event = require('../models/Event');
 const { isAuthenticated } = require('../middlewares/auth');
 
-
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) return next();
   res.redirect('/login');

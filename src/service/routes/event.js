@@ -14,14 +14,14 @@ cloudinary.config({
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
-
+//ROTTA DI CREAZIONE PAGINA EVENTI PER UTENTI NORMALI
 router.get('/create', (req, res) => {
     res.render('event/userCreate', {
         mapboxToken: process.env.MAPBOX_TOKEN,
         showLayoutParts: true
     });
 });
-
+//ROTTA DI CREAZIONE PAGINA EVENTI PER UTENTI NORMALI
 router.post('/create', upload.array('image', 5), async (req, res) => {
     try {
         const { DateTime } = require('luxon');
@@ -64,14 +64,14 @@ router.post('/create', upload.array('image', 5), async (req, res) => {
         console.log('Cloudinary config:', process.env.CLOUD_NAME, process.env.CLOUD_API_KEY);
     }
 });
-
+//ROTTA DI CREAZIONE PAGINA EVENTI PER UTENTI COMPANY
 router.get('/create-public', (req, res) => {
     res.render('event/organizationCreate', {
         mapboxToken: process.env.MAPBOX_TOKEN,
         showLayoutParts: true
     });
 });
-
+//ROTTA DI CREAZIONE PAGINA EVENTI PER UTENTI COMPANY, DA OTTIMIZZARE
 router.post('/create-public', upload.array('image', 5), async (req, res) => {
     try {
         const { DateTime } = require('luxon');
@@ -121,6 +121,7 @@ router.post('/create-public', upload.array('image', 5), async (req, res) => {
         console.log('Cloudinary config:', process.env.CLOUD_NAME, process.env.CLOUD_API_KEY);
     }
 });
+//ROTTA PER L'ISCIZIONE AGLI EVENTI
 router.post('/:id/subscribe', async (req, res) => {
     if (!req.user) return res.redirect('/login');
 
@@ -149,7 +150,7 @@ router.post('/:id/subscribe', async (req, res) => {
         res.status(500).send('Errore durante l\'iscrizione');
     }
 });
-
+//ROTTA PER L'ISCIZIONE AGLI EVENTI
 router.post('/:id/unsubscribe', async (req, res) => {
     if (!req.user) return res.status(401).send("Non autenticato");
 
@@ -164,7 +165,7 @@ router.post('/:id/unsubscribe', async (req, res) => {
         res.status(500).send("Errore durante la disiscrizione");
     }
 });
-
+//ROTTA PER IL REPORT EVENTO
 router.post('/:id/report', async (req, res) => {
     try {
         if (!req.user) {
@@ -193,7 +194,8 @@ router.post('/:id/report', async (req, res) => {
     }
 });
 
-
+//FUNZIONE DI NOTIFICA
+/*
 async function notifySubscribers(eventId, newData) {
     const event = await Event.findById(eventId);
     const users = await User.find({ subscribedEvents: eventId });
@@ -215,7 +217,7 @@ async function notifySubscribers(eventId, newData) {
         });
     }
 }
-
+*/
 
 
 

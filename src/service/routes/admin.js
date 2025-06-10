@@ -8,7 +8,6 @@ const eventController = require('../controllers/eventController');
 
 const adminLayout = '../views/layouts/admin';
 
-
 // Middleware di protezione
 function isAdmin(req, res, next) {
   if (req.isAuthenticated() && req.user.role === 'admin') {
@@ -18,7 +17,7 @@ function isAdmin(req, res, next) {
   res.redirect('/admin');
 }
 
-// middleware di log
+// routing di log
 router.use((req, res, next) => {
   console.log(`${req.method} ${req.originalUrl}`);
   next();

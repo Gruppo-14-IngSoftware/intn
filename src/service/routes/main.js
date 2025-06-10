@@ -8,149 +8,59 @@ const upload = multer({ dest: 'uploads/' });
 const axios = require('axios');
 const { isAuthenticated, isEventOwnerOrAdmin } = require('../middlewares/auth');
 const {cloudinary} = require("../utilities/cloudinary");
+const { getAllEvents } = require('../utilities/eventUtilities');
 
 //ROUTING CON INDICATORE NUMERO DELLE PAGINE
 router.get('/', async (req, res) => {
-    try{
+    try {
         const locals = {
             title: "intn",
             description: "events webapp",
             showLayoutParts: true,
-            showLayoutCar : true
-        }
-        let perPage = 10;
-        let page = parseInt(req.query.page) || 1;
+            showLayoutCar: true
+        };
+        const perPage = 10;
+        const page = parseInt(req.query.page) || 1;
 
-        const dataDB = await Event.aggregate([{
-            $sort: {createdAt: -1},
-        }]).skip(perPage * (page - 1)).limit(perPage).exec();
-
-        const count = await Event.countDocuments();
-        const apiTrento = await axios.get('https://www.comune.trento.it/api/opendata/v2/content/search/classes%20%27event%27');
-        const dataAPI = apiTrento.data.searchHits;
-
-        const userEvents = dataDB.map(e => ({
-            id: e._id,
-            title: e.title,
-            description: e.description,
-            images: e.images && e.images.length ? e.images : [e.imageUrl],
-            source: 'local',
-            date: new Date(e.date)
-        }));
-
-        const baseUrl = 'https://www.comune.trento.it';
-        const TrentoEvents = dataAPI.map(e => {
-            const itaData = e.data['ita-IT'];
-
-            const imgUrl = itaData.virtual_image && itaData.virtual_image.length > 0
-                ? baseUrl + itaData.virtual_image[0].url
-                : '/img/default.webp';
-
-            const place = itaData.virtual_takes_place_in && itaData.virtual_takes_place_in.length > 0
-                ? itaData.virtual_takes_place_in[0]
-                : {};
-
-            const dateStr = itaData.time_interval?.input?.startDateTime || e.metadata.published || e.metadata.modified;
-
-            return {
-                id: e.metadata.id,
-                title: itaData.event_title || 'Evento Comune di Trento',
-                description: itaData.event_abstract ? itaData.event_abstract.replace(/<[^>]*>?/gm, '') : 'Descrizione non disponibile',
-                images: [imgUrl],
-                location: place.name || 'Trento',
-                coordinates: {
-                    latitude: place.latitude ? parseFloat(place.latitude) : null,
-                    longitude: place.longitude ? parseFloat(place.longitude) : null
-                },
-                source: 'trento',
-                date: dateStr ? new Date(dateStr) : new Date(0)
-            };
-        });
-
-        const allEvents = [...userEvents, ...TrentoEvents];
-        allEvents.sort((a, b) => b.date - a.date);
-
-        const totalCount = count + TrentoEvents.length;
-        const nextPage = page + 1;
-        const hasNextPage = nextPage <= Math.ceil(totalCount / perPage);
+        const { allEvents, totalCount } = await getAllEvents({});
 
         const paginatedEvents = allEvents.slice((page - 1) * perPage, page * perPage);
-        res.render('index', { locals,
+        const hasNextPage = page * perPage < totalCount;
+
+        res.render('index', {
+            locals,
             events: paginatedEvents,
             current: page,
             user: req.user,
-            nextPage: hasNextPage ? nextPage : null
+            nextPage: hasNextPage ? page + 1 : null
         });
-    }catch (e) {
-        //error page
+    } catch (e) {
+        console.error("Errore nella home:", e);
+        res.status(500).render('500');
     }
-    //res.send('index');
 });
-
+//ROTTA PAGINA ABOUT
 router.get('/about', (req, res) =>{
-    res.send('about');
+    res.render('about');
 });
-
-router.get('/eventList',async (req, res) =>{
-    try{
+//ROTTA PER LA LISTA COMPLETA DEGLI EVENTI ORDINATA PER DATA PERTINENTE
+router.get('/eventList', async (req, res) => {
+    try {
         const locals = {
             title: "intn",
             description: "events webapp",
             showLayoutParts: true,
-            sidebar: 'userSidebar'
-        }
+        };
+
         const now = new Date();
-        const dataDB = await Event.find({})
-            .sort({ date: 1 })
-            .exec();
 
-        const count = await Event.countDocuments({ date: { $gte: now } });
-        const apiTrento = await axios.get('https://www.comune.trento.it/api/opendata/v2/content/search/classes%20%27event%27');
-        const dataAPI = apiTrento.data.searchHits;
-
-        const userEvents = dataDB.map(e => ({
-            id: e._id,
-            title: e.title,
-            description: e.description,
-            images: e.images && e.images.length ? e.images : [e.imageUrl],
-            source: 'local',
-            date: new Date(e.date)
-        }));
-
-        const baseUrl = 'https://www.comune.trento.it';
-        const TrentoEvents = dataAPI.map(e => {
-            const itaData = e.data['ita-IT'];
-
-            const imgUrl = itaData.virtual_image && itaData.virtual_image.length > 0
-                ? baseUrl + itaData.virtual_image[0].url
-                : '/img/default.webp';
-
-            const place = itaData.virtual_takes_place_in && itaData.virtual_takes_place_in.length > 0
-                ? itaData.virtual_takes_place_in[0]
-                : {};
-
-            const dateStr = itaData.time_interval?.input?.startDateTime || e.metadata.published || e.metadata.modified;
-
-            return {
-                id: e.metadata.id,
-                title: itaData.event_title || 'Evento Comune di Trento',
-                description: itaData.event_abstract ? itaData.event_abstract.replace(/<[^>]*>?/gm, '') : 'Descrizione non disponibile',
-                images: [imgUrl],
-                location: place.name || 'Trento',
-                coordinates: {
-                    latitude: place.latitude ? parseFloat(place.latitude) : null,
-                    longitude: place.longitude ? parseFloat(place.longitude) : null
-                },
-                source: 'trento',
-                date: dateStr ? new Date(dateStr) : new Date(0)
-            };
-        });
-
-        const allEvents = [...userEvents, ...TrentoEvents];
-        allEvents.sort((a, b) => {
-            const aDiff = Math.abs(a.date - now);
-            const bDiff = Math.abs(b.date - now);
-            return aDiff - bDiff;
+        const { allEvents } = await getAllEvents({
+            query: {}, // nessun filtro
+            customSortFunction: (a, b) => {
+                const aDiff = Math.abs(a.date - now);
+                const bDiff = Math.abs(b.date - now);
+                return aDiff - bDiff;
+            }
         });
 
         res.render('event/eventList', {
@@ -158,12 +68,12 @@ router.get('/eventList',async (req, res) =>{
             events: allEvents,
             user: req.user
         });
-    }catch (e) {
-        //error page
+    } catch (e) {
+        console.error("Errore nella lista eventi:", e);
+        res.status(500).render('500');
     }
 });
-
-//EVENT PAGE
+//ROTTA CHE INDIRIZZA ALLA SINGOLA PAGINA
 router.get('/event/:id', async (req, res) => {
     try {
         const slug = req.params.id;
@@ -256,7 +166,7 @@ router.get('/event/:id', async (req, res) => {
         res.status(404).render('404', { showLayoutParts: true });
     }
 });
-
+//ROTTA PER LA MODIFICA EVENTI
 router.get('/event/:id/edit', isAuthenticated, isEventOwnerOrAdmin, async (req, res) => {
     const event = await Event.findById(req.params.id);
     if (!event) return res.status(404).send("Evento");
@@ -280,7 +190,7 @@ router.get('/event/:id/edit', isAuthenticated, isEventOwnerOrAdmin, async (req, 
     });
     console.log("Ruolo utente al momento dell'acceso edit:", req.user.role);
 });
-
+//ROTTA PER LA MODIFICA EVENTI
 router.put('/event/:id/edit', isAuthenticated, isEventOwnerOrAdmin, upload.array('image'), async (req, res) => {
     try {
         const { title, description, street, city, province, country, date, tag } = req.body;
@@ -314,7 +224,7 @@ router.put('/event/:id/edit', isAuthenticated, isEventOwnerOrAdmin, upload.array
     }
 });
 
-
+//ROTTA I COMMENTI
 router.post('/event/:id/comment', async (req, res) => {
     try {
         const { comment } = req.body;
@@ -336,7 +246,7 @@ router.post('/event/:id/comment', async (req, res) => {
         res.status(500).send("Errore interno.");
     }
 });
-
+//ROTTA PER L-ELIMINAZIONE EVENTI
 router.get('/event/:id/delete', isAuthenticated, isEventOwnerOrAdmin, async (req, res) => {
     const event = await Event.findById(req.params.id);
     if (!event) return res.status(404).send('Evento non trovato');
@@ -357,10 +267,7 @@ router.delete('/event/:id', isAuthenticated, isEventOwnerOrAdmin, async (req, re
     }
 });
 
-
-
-//POST ROUTE
-//POST search
+//ROTTA PER LA RICERCA
 router.post('/search', async (req, res) => {
     try{
         const locals = {

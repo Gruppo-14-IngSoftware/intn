@@ -1,3 +1,6 @@
+//Per nodemailer
+require('dotenv').config();
+
 //SETUP EXPRESS APP, MIDDLEWARE e ROTTE
 const express = require('express');
 const expressLayout = require('express-ejs-layouts');
@@ -15,6 +18,8 @@ const { storage } = require('./src/service/utilities/cloudinary');
 const eventsRouter = require('./src/service/routes/event');
 const methodOverride = require('method-override');
 const cors = require('cors');
+const companyRoutes = require('./src/service/routes/company');
+
 
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
@@ -29,6 +34,8 @@ app.use(cors());
 //CONFIG MIDDLEWARE STATICI (da spostare)
 app.use(expressLayout);
 app.use(express.static(path.join(__dirname, 'src', 'public')));
+app.use('/uploads', express.static(path.join(__dirname, 'src', 'public', 'uploads')));
+
 
 //CONFIG SESSIONE
 app.use(session({
@@ -69,6 +76,8 @@ app.use('/', main);
 app.use('/', authRoutes);
 app.use('/events', eventsRouter);
 app.use('/', admin);
+app.use('/company', companyRoutes);
+
 
 // Rotte stats
 app.use('/api/stats', admin);

@@ -38,8 +38,34 @@
     }
   </script>
 </head>
+    <% if (user && user.role === 'user') { %>
+      <hr>
+      <form action="/company/request-access" method="GET">
+        <button type="submit">Passa a profilo aziendale</button>
+      </form>
+    <% } else if (user && user.role === 'company') { %>
+      <hr>
+      <p><strong>Profilo aziendale attivo</strong></p>
+      <a href="/company/request-info">📄 Richiedi info al comune</a>
+      <% if (user.verification && user.verification.status) { %>
+        <p>Stato verifica: <strong><%= user.verification.status %></strong></p>
+      <% } %>
+    <% } %>
 <body>
   <h1>Profilo Utente</h1>
+  <% if (user && user.verification) { %>
+    <hr>
+    <h3>Stato richiesta aziendale</h3>
+    <% if (user.verification.status === 'pending') { %>
+      <p>⏳ Richiesta in attesa di approvazione</p>
+    <% } else if (user.verification.status === 'approved') { %>
+      <p>✅ Profilo aziendale approvato</p>
+    <% } else if (user.verification.status === 'rejected') { %>
+      <p>❌ Richiesta rifiutata. Puoi inviarne una nuova</p>
+    <% } else if (user.verification.status === 'blocked') { %>
+      <p>🚫 La tua richiesta è stata bloccata. Non puoi inviarne altre da questo account.</p>
+    <% } %>
+  <% } %>
 
   <form action="/profile/update" method="POST">
     <label>Nome:</label>
@@ -90,5 +116,39 @@
   <form action="/profile/delete" method="POST" onsubmit="return confirm('Sei sicuro di voler eliminare il tuo account? Questa azione è irreversibile.')">
     <button type="submit" class="danger">Elimina account</button>
   </form>
+
+    <hr>
+
+  <h2>Storico Eventi</h2>
+
+  <h3>🟢 Eventi creati da te</h3>
+  <% if (user.createdEvents?.length === 0) { %>
+    <p>Non hai creato eventi.</p>
+  <% } else { %>
+    <ul>
+      <% user.createdEvents.forEach(e => { %>
+        <li>
+          <a href="/event/<%= e._id %>"><strong><%= e.title %></strong></a>
+          – <%= e.date.toLocaleDateString() %>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+
+  <h3>🔵 Eventi a cui sei iscritto</h3>
+  <% if (user.subscribedEventsData?.length === 0) { %>
+    <p>Non sei iscritto a nessun evento.</p>
+  <% } else { %>
+    <ul>
+      <% user.subscribedEventsData.forEach(e => { %>
+        <li>
+          <a href="/event/<%= e._id %>"><strong><%= e.title %></strong></a>
+          – <%= e.date.toLocaleDateString() %>
+          <span style="color: gray;">(accesso privato)</span>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+
 </body>
 </html>

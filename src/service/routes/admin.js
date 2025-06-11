@@ -5,6 +5,10 @@ const User = require('../models/User');
 const Event = require('../models/Event');
 const statsController = require('../controllers/statsController');
 const eventController = require('../controllers/eventController');
+const CompanyInfoRequest = require('../models/CompanyInfoRequest');
+const nodemailer = require('nodemailer');
+const path = require('path');
+const fs = require('fs');
 const { isAdmin } = require('../middlewares/auth');
 const adminLayout = '../views/layouts/admin';
 

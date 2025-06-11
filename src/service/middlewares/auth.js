@@ -1,5 +1,8 @@
+/*GESTIONE MIDDLEWARE PER SICUREZZA ROTTR*/
+
 const Event = require('../models/Event');
 
+//MIDDLWARE DI AUTENTICAZIONE
 function isAuthenticated(req, res, next) {
     if (req.isAuthenticated && req.isAuthenticated()) {
         return next();
@@ -7,6 +10,7 @@ function isAuthenticated(req, res, next) {
     res.redirect('/login');
 }
 
+//MIDDLWARE POSSESSO EVENTO o ADMIN
 async function isEventOwnerOrAdmin(req, res, next) {
     try {
         const event = await Event.findById(req.params.id);
@@ -25,6 +29,16 @@ async function isEventOwnerOrAdmin(req, res, next) {
     }
 }
 
+//MIDDLEWARE CONTROLLO ADMIN
+function isAdmin(req, res, next) {
+    if (req.isAuthenticated() && req.user.role === 'admin') {
+        return next();
+    }
+    req.flash('error_msg', 'Accesso riservato agli amministratori');
+    res.redirect('/admin');
+}
+
+//MIDDLEWARE DI CONTROLLO RUOLO=AZIENDA
 function isCompany(req, res, next) {
     if (req.user && req.user.role === 'company') {
         return next();
@@ -35,5 +49,6 @@ function isCompany(req, res, next) {
 module.exports = {
     isAuthenticated,
     isEventOwnerOrAdmin,
+    isAdmin,
     isCompany
 };

@@ -1,12 +1,14 @@
+/*GESTIONE ROTTE PROFILI AZIENDALI*/
+
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
-const { isAuthenticated, isCompany } = require('../middlewares/auth'); // <-- fixato qui
+const { isAuthenticated, isCompany } = require('../middlewares/auth');
 const User = require('../models/User');
 
 
-// Setup upload
+//SETUP UPLOAD DOCUMENTI
 const storage = multer.diskStorage({
   destination: path.resolve('src/public/uploads'),
   filename: (req, file, cb) => {
@@ -27,7 +29,7 @@ router.get('/request-access', isAuthenticated, (req, res) => {
 
 const uploadSingle = multer({ storage }).single('identityDoc');
 
-// POST richiesta accesso azienda
+//POST RICHIESTA ACCESSO AZIENDA
 router.post('/request-access', isAuthenticated, (req, res) => {
   if (req.user.role !== 'user') {
     return res.redirect('/profile');
@@ -45,10 +47,10 @@ router.post('/request-access', isAuthenticated, (req, res) => {
     try {
       const { companyName, vatNumber, address, companyEmail } = req.body;
 
-      // Verifica stato attuale
+      //verifica stato attuale
       const currentStatus = req.user.verification?.status;
 
-      // Blocchi stati non modificabili
+      //blocchi stati non modificabili
       if (['pending', 'approved', 'blocked'].includes(currentStatus)) {
         return res.status(403).render('company/request-access', {
           user: req.user,
@@ -56,12 +58,12 @@ router.post('/request-access', isAuthenticated, (req, res) => {
         });
       }
 
-      // Se è stato rejected → pulizia dati
+      //se è stato rejected → pulizia dati
       if (currentStatus === 'rejected') {
         req.user.verification = { status: 'none' };
       }
 
-      // Validazione P.IVA
+      //validazione P.IVA
       if (!/^\d{11}$/.test(vatNumber)) {
         return res.status(400).render('company/request-access', {
           user: req.user,
@@ -71,7 +73,7 @@ router.post('/request-access', isAuthenticated, (req, res) => {
 
       const duplicate = await User.findOne({ 'verification.vatNumber': vatNumber });
 
-      // Blocco se P.IVA già usata da altro utente
+      //blocco se P.IVA già usata da altro utente
       if (duplicate && !duplicate._id.equals(req.user._id)) {
         return res.status(400).render('company/request-access', {
           user: req.user,
@@ -81,7 +83,7 @@ router.post('/request-access', isAuthenticated, (req, res) => {
 
       const docPath = req.file ? '/uploads/' + req.file.filename : null;
 
-      // Aggiorna dati verifica
+      //aggiorna dati verifica
       req.user.verification = {
         status: 'pending',
         companyName,
@@ -107,15 +109,14 @@ router.post('/request-access', isAuthenticated, (req, res) => {
   });
 });
 
-// Mostra il form per richiedere al comune i requisiti per creare eventi.
-// Accessibile solo da utenti con ruolo 'company'.
+//FORM PER RICHIEDERE AL COMUNE I REQUISITI PER CREARE EVENTI
+//ACCESSIBILE SOLO DA UTENTI CON RUOLO 'COMPANY'
 router.get('/request-info', isAuthenticated, isCompany, (req, res) => {
   res.render('company/request-info', { user: req.user, message: null });
 });
 
-// Gestisce l'invio della richiesta al comune da parte dell'azienda.
-// Per ora simula l'invio scrivendo il messaggio nel terminale (console.log).
-
+// GESTISCE L'INVIO DELLA RICHIESTA AL COMUNE DA PARTE DELL'AZIENDA
+// PER ORA SIMULA L'INVIO SCRIVENDO IL MESSAGGIO NEL TERMINALE (CONSOLE.LOG)
 const CompanyInfoRequest = require('../models/CompanyInfoRequest');
 
 router.post('/request-info', isAuthenticated, isCompany, async (req, res) => {

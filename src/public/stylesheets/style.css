@@ -1,3 +1,5 @@
+/* STYLESHEET GENERALE*/
+
 html, body {
     margin: 0;
     padding: 0;
@@ -6,7 +8,7 @@ html, body {
 }
 .page {
     display: grid;
-    grid-template-rows: auto 1fr auto; /* header, contenuto, footer */
+    grid-template-rows: auto 1fr auto;
     height: 100vh;
 }
 
@@ -29,7 +31,7 @@ html, body {
 }
 .custom-navbar .nav-link,
 .custom-navbar .navbar-brand {
-    color: #ffffff; /* colore del testo */
+    color: #ffffff;
 }
 .custom-navbar .nav-link:hover {
     color: #a0d8ef;
@@ -73,6 +75,7 @@ html, body {
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none;
 }
+
 .content::-webkit-scrollbar {
     display: none;
 }
@@ -310,18 +313,15 @@ html, body {
     margin: 0 auto;
 }
 
-/* Riduci padding top card-body per avvicinarlo all'immagine */
 .card-body {
     padding-top: 0.5rem !important;
 }
 
-/* Se vuoi puoi anche rimuovere margini extra */
 .container.my-4 {
     margin-top: 1rem !important;
     margin-bottom: 1rem !important;
 }
 
-/* style per grafici di statistica */
 .dashboard-row {
     display: flex;
     flex-wrap: wrap;
@@ -336,13 +336,13 @@ html, body {
     background: #fff;
 }
 
-
 canvas {
     display: block;
     width: 60% !important;
     height: auto !important;
 }
 
+/* STYLING ADMIN*/
 .chart-container {
     width: 100%;
     max-width: 500px;
@@ -351,13 +351,6 @@ canvas {
     position: relative;
 }
 
-@media (max-width: 768px) {
-    .dashboard-row section {
-        flex: 1 1 100%;
-    }
-}
-
-/* style per tabella */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -440,7 +433,6 @@ td button:hover {
     background-color: #2c5282;
 }
 
-/* Stile specifico per la tabella degli eventi segnalati */
 #reported-events-table {
     width: 100%;
     border-collapse: collapse;
@@ -461,6 +453,8 @@ td button:hover {
     font-weight: bold;
 }
 
+
+/* RESPONSIVE CSS*/
 @media (max-width: 768px) {
     .navbar-collapse {
         flex-direction: column;
@@ -480,7 +474,6 @@ td button:hover {
     }
 }
 
-
 @media (max-width: 768px) {
     .eventTitle {
         font-size: 1.2rem;
@@ -499,7 +492,11 @@ td button:hover {
     }
 }
 
-
+@media (max-width: 768px) {
+    .dashboard-row section {
+        flex: 1 1 100%;
+    }
+}
 
 
 

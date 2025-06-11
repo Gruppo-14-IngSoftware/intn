@@ -1,5 +1,6 @@
+/*CONTROLLER EVENTI PER OTTENERE DIVERE TIPOLOGIE DI EVENTI PER STATISTICHE ADMIN*/
 const Event = require('../models/Event');
-
+//RAGGRUPPA EVENTI PER MESE
 exports.getEventsByMonth = async (req, res) => {
   try {
     const result = await Event.aggregate([
@@ -16,7 +17,7 @@ exports.getEventsByMonth = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
+//RAGGRUPPA EVENTI PER TAG
 exports.getEventsByTag = async (req, res) => {
   try {
     const result = await Event.aggregate([
@@ -28,7 +29,7 @@ exports.getEventsByTag = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
+//RAGGRUPPA EVENTI PER STATO DI VERIFICA
 exports.getEventsVerified = async (req, res) => {
   try {
     const result = await Event.aggregate([
@@ -39,7 +40,7 @@ exports.getEventsVerified = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
+//RAGGRUPPA EVENTI PER RUOLO DI CREAZIOME
 exports.getEventsByRole = async (req, res) => {
   try {
     const result = await Event.aggregate([

@@ -1,6 +1,7 @@
-//SCHEMA EVENTO
+//MODELLO EVENTO PER GESTIRE GLI EVENTI e MODELLO COMMENTI PER GESTIRE I COMMENTI EMBEDDED(NON OTTIMALE)
 const mongoose = require('mongoose');
 const schema = mongoose.Schema;
+//SCHEMA COMMENTI
 const commentSchema = new mongoose.Schema({
     text: { type: String, required: true },
     author: {
@@ -13,6 +14,7 @@ const commentSchema = new mongoose.Schema({
         default: Date.now
     }
 });
+//SCHEMA EVENTO
 const eventSchema = new schema({
     title:{
         type: String,

@@ -1,15 +1,12 @@
+/*GESTIONE ROTTE DI AUTENTICAZIONE*/
+
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const Event = require('../models/Event');
-const { isAuthenticated } = require('../middlewares/auth');
-
-function ensureAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) return next();
-  res.redirect('/login');
-}
+const { isAuthenticated } = require('../middlewares/auth'); /*MIDDLEWARE RICHIESTI*/
 
 //ROUTING ALLA REGISTRAZIONE GET
 router.get('/signup', (req, res) => {
@@ -96,7 +93,7 @@ router.get('/logout', (req, res, next) => {
   });
 });
 
-//Questa rotta carica la pagina profile.ejs e passa i dati dell’utente loggato
+//QUESTA ROTTA CARICA LA PAGINA PROFILE.EJS E PASSA I DATI DELL’UTENTE LOGGATO
 router.get('/profile', isAuthenticated, async (req, res) => {
   try {
     const createdEvents = await Event.find({ createdBy: req.user._id }).sort({ date: -1 });
@@ -116,14 +113,13 @@ router.get('/profile', isAuthenticated, async (req, res) => {
   }
 });
 
-
-//Quando viene effettuato l'update aggiorna i dati dell’utente nel DB (compreso di change psw)
-router.post('/profile/update', ensureAuthenticated, async (req, res) => {
+//QUANDO VIENE EFFETTUATO L'UPDATE AGGIORNA I DATI DELL’UTENTE NEL DB (COMPRESO DI CHANGE PSW) (AI HELP)
+router.post('/profile/update', isAuthenticated, async (req, res) => {
   const {
     firstname,
     lastname,
     email,
-    username = req.user.username, // fallback automatico
+    username = req.user.username, //fallback automatico
     currentPassword,
     newPassword,
     confirmNewPassword
@@ -132,18 +128,18 @@ router.post('/profile/update', ensureAuthenticated, async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
 
-    // Verifica che username sia presente
+    //Verifica che username sia presente
     if (!username) {
       return res.status(400).send('Lo username è obbligatorio.');
     }
 
-    // Controllo modifica username (evita conflitti)
+    //controllo modifica username (evita conflitti)
     const existingUser = await User.findOne({ username });
     if (existingUser && existingUser._id.toString() !== req.user._id.toString()) {
       return res.status(400).send('Username già in uso.');
     }
 
-    // Cambio password
+    //Cambio password
     if (currentPassword || newPassword || confirmNewPassword) {
       if (!currentPassword || !newPassword || !confirmNewPassword) {
         return res.status(400).send('Compila tutti i campi per il cambio password.');
@@ -162,10 +158,10 @@ router.post('/profile/update', ensureAuthenticated, async (req, res) => {
         return res.status(400).send('La nuova password deve contenere almeno 8 caratteri.');
       }
 
-      user.password = newPassword; // sarà hashata dal middleware pre('save')
+      user.password = newPassword; //sarà hashata dal middleware pre('save')
     }
 
-    // Aggiorna gli altri dati
+    //aggiorna gli altri dati
     user.firstname = firstname;
     user.lastname = lastname;
     user.email = email;
@@ -180,8 +176,8 @@ router.post('/profile/update', ensureAuthenticated, async (req, res) => {
   }
 });
 
-//Elimina l’account dal database, termina la sessione e reindirizza alla homepage
-router.post('/profile/delete', ensureAuthenticated, async (req, res, next) => {
+//ELIMINA L’ACCOUNT DAL DATABASE, TERMINA LA SESSIONE E REINDIRIZZA ALLA HOMEPAGE
+router.post('/profile/delete', isAuthenticated, async (req, res, next) => {
   try {
     await User.findByIdAndDelete(req.user._id);
     req.logout(function (err) {
@@ -195,7 +191,7 @@ router.post('/profile/delete', ensureAuthenticated, async (req, res, next) => {
   }
 });
 
-// Event user history
+//EVENT USER HISTORY
 router.get('/event/:id', async (req, res) => {
   try {
     const event = await Event.findById(req.params.id).populate('createdBy');
@@ -204,7 +200,7 @@ router.get('/event/:id', async (req, res) => {
     const isCreator = req.user && event.createdBy.equals(req.user._id);
     const isSubscribed = req.user && req.user.subscribedEvents.includes(event._id.toString());
 
-    // Accesso consentito solo se:
+    //accesso consentito solo se:
     const accessGranted =
       event.createdByRole === 'user' || // evento pubblico
       isCreator ||                      // o sei il creatore

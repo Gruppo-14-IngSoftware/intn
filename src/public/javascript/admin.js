@@ -1,4 +1,4 @@
-//visualizzazione utenti
+//VISUALIZZAZIONE UTENTI (AI HELP)
 fetch('/admin/users')
   .then(res => res.json())
   .then(users => {
@@ -6,22 +6,22 @@ fetch('/admin/users')
     users.forEach(u => {
       const row = document.createElement('tr');
 
-      // USERNAME
+      //USERNAME
       const usernameCell = document.createElement('td');
       usernameCell.textContent = u.username;
       row.appendChild(usernameCell);
 
-      // EMAIL
+      //EMAIL
       const emailCell = document.createElement('td');
       emailCell.textContent = u.email;
       row.appendChild(emailCell);
 
-      // ROLE
+      //ROLE
       const roleCell = document.createElement('td');
       roleCell.textContent = u.role;
       row.appendChild(roleCell);
 
-      // PROMOTE
+      //PROMOTE
       const promoteCell = document.createElement('td');
       const promoteButton = document.createElement('button');
       promoteButton.textContent = 'PROMOTE';
@@ -30,7 +30,7 @@ fetch('/admin/users')
 
       if (u.role !== 'admin') {
         promoteButton.addEventListener('click', () => {
-          // Invio diretto al backend
+          //INVIO DIRETTO AL BACKEND
           fetch('/admin/promote', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -41,7 +41,7 @@ fetch('/admin/users')
               return res.json();
             })
             .then(data => {
-              // Ricarica per aggiornare la tabella e mostrare flash
+              // RICARICA PER AGGIORNARE LA TABELLA E MOSTRARE FLASH
               location.reload();
             })
             .catch(err => {
@@ -64,7 +64,7 @@ fetch('/admin/users')
 
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Toggle form "Aggiungi Admin"
+    //FORM "AGGIUNGI ADMIN"
     const toggleLink = document.getElementById('toggleAddAdmin');
     const addAdminContainer = document.getElementById('addAdminContainer');
     if (toggleLink && addAdminContainer) {
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Form: Promuovi Utente a Admin
+    //FORM PROMOZIONE UTENTE
     const promoteForm = document.getElementById('promoteForm');
     if (promoteForm) {
       promoteForm.addEventListener('submit', async e => {
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Form: Aggiungi Nuovo Admin
+    //FORM AGGIUNTA ADMIN
     const addAdminForm = document.getElementById('addAdminForm');
     if (addAdminForm) {
     addAdminForm.addEventListener('submit', async e => {
@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('responseMsg').textContent = data.message || data.error;
 
         if (res.ok && data.message) {
-            setTimeout(() => location.reload(), 1000); // attende 1 secondo per mostrare il messaggio
+            setTimeout(() => location.reload(), 1000);
         }
         } catch (err) {
         document.getElementById('responseMsg').textContent = 'Errore di rete durante l\'aggiunta.';

@@ -1,3 +1,4 @@
+//MODELLO UTENTE
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 //SCHEMA UTENTE

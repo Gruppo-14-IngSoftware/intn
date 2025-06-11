@@ -1,4 +1,4 @@
-//JS ROUTING
+//GESTIONE ROTTE PRINCIPALI
 const express = require('express');
 const router = express.Router();
 const Event = require('../models/Event');
@@ -8,7 +8,7 @@ const upload = multer({ dest: 'uploads/' });
 const axios = require('axios');
 const { isAuthenticated, isEventOwnerOrAdmin } = require('../middlewares/auth');
 const {cloudinary} = require("../utilities/cloudinary");
-const { getAllEvents } = require('../utilities/eventUtilities');
+const { getAllEvents } = require('../utilities/eventUtilities'); //richiesta utility eventi
 
 //ROUTING CON INDICATORE NUMERO DELLE PAGINE
 router.get('/', async (req, res) => {
@@ -73,7 +73,8 @@ router.get('/eventList', async (req, res) => {
         res.status(500).render('500');
     }
 });
-//ROTTA CHE INDIRIZZA ALLA SINGOLA PAGINA
+
+//ROTTA CHE INDIRIZZA ALLA SINGOLA PAGINA (SI PUò OTTIMIZZARE)
 router.get('/event/:id', async (req, res) => {
     try {
         const slug = req.params.id;
@@ -166,6 +167,7 @@ router.get('/event/:id', async (req, res) => {
         res.status(404).render('404', { showLayoutParts: true });
     }
 });
+/* ROTTE DI MODIFICA (SI POSSONO SPOSTARE NELL'ALTRO FILE)*/
 //ROTTA PER LA MODIFICA EVENTI
 router.get('/event/:id/edit', isAuthenticated, isEventOwnerOrAdmin, async (req, res) => {
     const event = await Event.findById(req.params.id);
@@ -190,6 +192,7 @@ router.get('/event/:id/edit', isAuthenticated, isEventOwnerOrAdmin, async (req, 
     });
     console.log("Ruolo utente al momento dell'acceso edit:", req.user.role);
 });
+
 //ROTTA PER LA MODIFICA EVENTI
 router.put('/event/:id/edit', isAuthenticated, isEventOwnerOrAdmin, upload.array('image'), async (req, res) => {
     try {
@@ -224,7 +227,7 @@ router.put('/event/:id/edit', isAuthenticated, isEventOwnerOrAdmin, upload.array
     }
 });
 
-//ROTTA I COMMENTI
+//ROTTA I COMMENTI (AI HELP)
 router.post('/event/:id/comment', async (req, res) => {
     try {
         const { comment } = req.body;
@@ -246,6 +249,7 @@ router.post('/event/:id/comment', async (req, res) => {
         res.status(500).send("Errore interno.");
     }
 });
+
 //ROTTA PER L-ELIMINAZIONE EVENTI
 router.get('/event/:id/delete', isAuthenticated, isEventOwnerOrAdmin, async (req, res) => {
     const event = await Event.findById(req.params.id);
@@ -267,7 +271,7 @@ router.delete('/event/:id', isAuthenticated, isEventOwnerOrAdmin, async (req, re
     }
 });
 
-//ROTTA PER LA RICERCA
+//ROTTA PER LA RICERCA (OTTIMIZZABILE)
 router.post('/search', async (req, res) => {
     try{
         const locals = {

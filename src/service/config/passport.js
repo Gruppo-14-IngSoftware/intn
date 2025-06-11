@@ -1,3 +1,4 @@
+/* CONFIGURAZIONE PASSPORT PER AUTENTICAZIONE*/
 const LocalStrategy = require('passport-local').Strategy;
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const bcrypt = require('bcrypt');
@@ -5,7 +6,7 @@ const passport = require('passport');
 const mongoose = require('mongoose');
 const User = require('../models/User');
 
-// Strategia login locale
+//STRATEGIA LOGIN LOCALE
 passport.use(new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
   try {
     const user = await User.findOne({ email });
@@ -18,7 +19,7 @@ passport.use(new LocalStrategy({ usernameField: 'email' }, async (email, passwor
   }
 }));
 
-// Strategia login con Google
+//STRATEGIA LOGIN CON GOOGLE
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -29,11 +30,11 @@ passport.use(new GoogleStrategy({
     let user = await User.findOne({ email });
 
     if (!user) {
-      // Non registrato: rifiuta l'accesso
+      //NON REGISTRATO: RIFIUTA L'ACCESSO
       return done(null, false, { message: 'Utente non registrato' });
     }
 
-    // Collega Google ID se non già presente
+    //COLLEGA GOOGLE ID SE NON GIÀ PRESENTE
     if (!user.googleId) {
       user.googleId = profile.id;
       await user.save();
@@ -45,8 +46,7 @@ passport.use(new GoogleStrategy({
   }
 }));
 
-
-// Serializzazione e deserializzazione utente
+//SERIALIZZAZIONE E DESERIALIZZAZIONE UTENTE
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });

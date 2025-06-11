@@ -1,8 +1,8 @@
+/*CONTROLLER STATISTICHE PER ADMIN*/
 const User = require('../models/User');
 const mongoose = require('mongoose');
 
-
-//STATISTICHE - UTENTI 
+//NUMERO TOTALE UTENTI
 exports.getOverview = async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
@@ -12,6 +12,7 @@ exports.getOverview = async (req, res) => {
   }
 };
 
+//UTENTI CREATI NEGLI UTLIMI 7 GIORNI (AI HELP)
 exports.getUserTrend = async (req, res) => {
   try {
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
@@ -31,21 +32,22 @@ exports.getUserTrend = async (req, res) => {
   }
 };
 
+//CONTA UTENTI ATTIVI (AI HELP)
 exports.getActiveUsers = async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
 
-    // Accedi alla collection delle sessioni
+    //ACCEDI ALLA COLLECTION DELLE SESSIONI
     const sessionCollection = mongoose.connection.collection('sessions');
 
     const now = new Date();
 
-    // Conta solo le sessioni non scadute
+    //CONTA SOLO LE SESSIONI NON SCADUTE
     const activeSessions = await sessionCollection.find({
       expires: { $gte: now }
     }).toArray();
 
-    // Estrarre gli userId dalle sessioni
+    //ESTRARRE GLI USERID DALLE SESSIONI
     const activeUserIds = activeSessions
       .map(s => {
         try {

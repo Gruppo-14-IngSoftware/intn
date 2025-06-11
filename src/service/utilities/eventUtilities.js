@@ -1,11 +1,11 @@
-// helpers/eventUtils.js
+//UTILITY PER OTTIMIZZARE E RISPARMIARE CODICE NEL ROUTING EVENTI (AI HELP)
 const axios = require('axios');
 const Event = require('../models/Event');
 
 const baseUrlTrento = 'https://www.comune.trento.it';
 const defaultImage = '/img/default.webp';
 
-//RECUPERO DATI EVENTO DAL DB
+//FUNZIONE RECUPERO DATI EVENTO DAL DB
 async function getLocalEvents(query = {}, sort = { createdAt: -1 }) {
     const events = await Event.find(query).sort(sort).exec();
     return events.map(e => ({
@@ -18,7 +18,7 @@ async function getLocalEvents(query = {}, sort = { createdAt: -1 }) {
     }));
 }
 
-//RECUPERO DATI DALL'API
+//FUNZIONE RECUPERO DATI DALL'API
 async function getTrentoEvents() {
     const res = await axios.get('https://www.comune.trento.it/api/opendata/v2/content/search/classes%20%27event%27');
     const dataAPI = res.data.searchHits || [];

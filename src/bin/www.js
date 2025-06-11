@@ -1,5 +1,5 @@
 //CONFIGURAZIONE SERVER
-require('dotenv').config();
+require('dotenv').config(); //INCLUSIONE FILE.ENV PER TOKEN E PASSWORD VARIE
 const app = require('../../app');
 const http = require('http');
 

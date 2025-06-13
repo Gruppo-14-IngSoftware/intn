@@ -10,12 +10,14 @@ html, body {
     display: grid;
     grid-template-rows: auto 1fr auto;
     height: 100vh;
+    min-height: 0;
 }
 
 .grid-layout {
     display: grid;
     grid-template-columns: 20% 1fr 20%;
     height: 100%;
+    min-height: 0;
 }
 
 .header {
@@ -67,13 +69,12 @@ html, body {
 }
 
 .content {
+    display: grid;
     background-color: #fff;
     padding: 20px;
     overflow-y: auto;
-    height: 100vh;
-
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none;
+    height: auto;
+    min-height: 0;
 }
 
 .content::-webkit-scrollbar {
@@ -261,11 +262,12 @@ html, body {
     margin-bottom: 0.5rem;
     box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
+
 #map {
-    height: 300px;
-    border-radius: 10px;
-    margin-bottom: 1rem;
+    width: 100% !important;
+    height: 400px !important;
 }
+
 .eventGallery {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -315,6 +317,7 @@ html, body {
 
 .card-body {
     padding-top: 0.5rem !important;
+    overflow: visible;
 }
 
 .container.my-4 {
@@ -335,14 +338,12 @@ html, body {
     border-radius: 8px;
     background: #fff;
 }
-
-canvas {
+/* STYLING ADMIN*/
+.chart-canvas {
     display: block;
     width: 60% !important;
     height: auto !important;
 }
-
-/* STYLING ADMIN*/
 .chart-container {
     width: 100%;
     max-width: 500px;
@@ -452,6 +453,7 @@ td button:hover {
     color: #f00;
     font-weight: bold;
 }
+
 
 
 /* RESPONSIVE CSS*/

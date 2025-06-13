@@ -46,9 +46,19 @@ function isCompany(req, res, next) {
     res.status(403).send('Accesso negato. Solo aziende possono accedere.');
 }
 
+//MIDDLEWARE CONTROLLO AUTENTICAZIONE ADMIN
+function skipIfAuthenticated(req, res, next) {
+    if (req.user && req.user.role === 'admin') {
+        return res.redirect('/admin/dashboard');
+    }
+    next();
+}
+
+
 module.exports = {
     isAuthenticated,
     isEventOwnerOrAdmin,
     isAdmin,
-    isCompany
+    isCompany,
+    skipIfAuthenticated
 };

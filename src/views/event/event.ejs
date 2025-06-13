@@ -1,11 +1,10 @@
 <div class="container my-4">
     <div class="card shadow-sm">
-
         <% if (Array.isArray(locals.images) && locals.images.length > 0) { %>
-            <div id="eventCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div id="eventCarousel" class="carousel slide mb3" data-bs-ride="carousel">
                 <div class="carousel-inner" style="border-radius: 10px; overflow: hidden;">
                     <% locals.images.forEach(function(img, index) { %>
-                        <div class="carousel-content <%= index === 0 ? 'active' : '' %>">
+                        <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
                             <img src="<%= img %>" class="d-block w-100 eventImage" alt="Immagine evento <%= index + 1 %>">
                         </div>
                     <% }) %>
@@ -22,7 +21,7 @@
                 <% } %>
             </div>
         <% } else { %>
-            <img src="<%= locals.image || '/images/default.jpg' %>" class="card-img-top" alt="Immagine evento">
+            <img src="<%= locals.image || '/img/default.webp' %>" class="card-img-top" alt="Immagine evento">
         <% } %>
 
         <div class="card-body py-0 px-3">
@@ -111,9 +110,10 @@
                     </form>
                 <% } %>
             </div>
-
-
-            <div id="map"></div>
+            <div class="my-4">
+                <h5>Luogo dell'evento</h5>
+                <div id="map"></div>
+            </div>
 
             <div class="comments">
                 <h3>Commenti</h3>
@@ -145,8 +145,8 @@
     }
 
     mapboxgl.accessToken = "<%= mapboxToken %>";
-    const lat = <%= data.coordinates.latitude %>;
-    const lon = <%= data.coordinates.longitude %>;
+    const lat = '<%= data.coordinates.latitude %>';
+    const lon = '<%= data.coordinates.longitude %>';
 
     if (lat && lon) {
         const map = new mapboxgl.Map({
@@ -154,6 +154,13 @@
             style: 'mapbox://styles/mapbox/streets-v12',
             center: [lon, lat],
             zoom: 13
+        });
+        map.on('load', () => {
+            map.resize();
+        });
+
+        window.addEventListener('resize', () => {
+            map.resize();
         });
 
         new mapboxgl.Marker()
@@ -165,6 +172,4 @@
     }
 </script>
 
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+

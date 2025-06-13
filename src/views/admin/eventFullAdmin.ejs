@@ -1,6 +1,6 @@
-<div class="admin-title">    
+<div class="admin-title">
+    <br><br>
     <h1>Dashboard Eventi</h1>
-    
     <div class="dashboard-row">
         <section>
             <h4>Eventi per Mese</h4>
@@ -8,21 +8,18 @@
                 <canvas id="eventsByMonthChart"></canvas>
             </div>
         </section>
-
         <section>
             <h4>Eventi per Tag</h4>
             <div class="chart-container">
                 <canvas id="eventsByTagChart"></canvas>
             </div>
         </section>
-
         <section>
             <h4>Eventi Verificati</h4>
             <div class="chart-container">
                 <canvas id="verifiedChart"></canvas>
             </div>
         </section>
-
         <section>
             <h4>Eventi per Ruolo Creatore</h4>
             <div class="chart-container">
@@ -30,48 +27,7 @@
             </div>
         </section>
     </div>
-
-    <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- Script inline per caricare i grafici -->
-    <script>
-    //visualizza eventi
-    async function loadChart(url, ctx, type, label) {
-      const res = await fetch(url);
-      const data = await res.json();
-      const labels = data.map(item => item._id);
-      const counts = data.map(item => item.count);
-
-      new Chart(ctx, {
-          type,
-          data: {
-            labels,
-            datasets: [{
-              label,
-              data: counts,
-              backgroundColor: [
-                'rgba(75, 192, 192, 0.6)',
-                'rgba(255, 99, 132, 0.6)',
-                'rgba(255, 206, 86, 0.6)',
-                'rgba(153, 102, 255, 0.6)'
-              ]
-            }]
-          }
-        });
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      loadChart('/api/event-stats/events-by-month', document.getElementById('eventsByMonthChart'), 'bar', 'Eventi per mese');
-      loadChart('/api/event-stats/events-by-tag', document.getElementById('eventsByTagChart'), 'pie', 'Categorie');
-      loadChart('/api/event-stats/events-verified', document.getElementById('verifiedChart'), 'doughnut', 'Verificati');
-      loadChart('/api/event-stats/events-by-role', document.getElementById('roleChart'), 'pie', 'Ruoli');
-    });
-    </script>
 </div>
-
-</div>
-
     <h2>Eventi Privati</h2>
 <% if (events.privati.length === 0) { %>
     <p>Nessun evento privato.</p>
@@ -169,6 +125,40 @@
         </tbody>
     </table>
 <% } %>
+
+<script>
+    //visualizza eventi
+    async function loadChart(url, ctx, type, label) {
+        const res = await fetch(url);
+        const data = await res.json();
+        const labels = data.map(item => item._id);
+        const counts = data.map(item => item.count);
+
+        new Chart(ctx, {
+            type,
+            data: {
+                labels,
+                datasets: [{
+                    label,
+                    data: counts,
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.6)',
+                        'rgba(255, 99, 132, 0.6)',
+                        'rgba(255, 206, 86, 0.6)',
+                        'rgba(153, 102, 255, 0.6)'
+                    ]
+                }]
+            }
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        loadChart('/api/event-stats/events-by-month', document.getElementById('eventsByMonthChart'), 'bar', 'Eventi per mese');
+        loadChart('/api/event-stats/events-by-tag', document.getElementById('eventsByTagChart'), 'pie', 'Categorie');
+        loadChart('/api/event-stats/events-verified', document.getElementById('verifiedChart'), 'doughnut', 'Verificati');
+        loadChart('/api/event-stats/events-by-role', document.getElementById('roleChart'), 'pie', 'Ruoli');
+    });
+</script>
 
 
 

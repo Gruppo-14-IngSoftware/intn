@@ -9,7 +9,7 @@ const CompanyInfoRequest = require('../models/CompanyInfoRequest');
 const nodemailer = require('nodemailer');
 const path = require('path');
 const fs = require('fs');
-const { isAdmin } = require('../middlewares/auth');
+const { isAdmin, skipIfAuthenticated } = require('../middlewares/auth');
 const adminLayout = '../views/layouts/admin';
 
 //ROUTING DI LOG
@@ -19,12 +19,12 @@ router.use((req, res, next) => {
 });
 
 //GET LOGIN ADMIN
-router.get('/admin', (req, res) => {
+router.get('/admin', skipIfAuthenticated, (req, res) => {
   res.render('admin/index', { layout: adminLayout });
 });
 
 //POST LOGIN CON PASSPORT
-router.post('/admin', (req, res, next) => {
+router.post('/admin', skipIfAuthenticated, (req, res, next) => {
   passport.authenticate('local', {
     successRedirect: '/admin/dashboard',
     failureRedirect: '/admin',

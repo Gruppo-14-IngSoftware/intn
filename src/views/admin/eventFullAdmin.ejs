@@ -5,30 +5,30 @@
         <section>
             <h4>Eventi per Mese</h4>
             <div class="chart-container">
-                <canvas id="eventsByMonthChart"></canvas>
+                <canvas id="eventsByMonthChart" class="chart-canvas"></canvas>
             </div>
         </section>
         <section>
             <h4>Eventi per Tag</h4>
             <div class="chart-container">
-                <canvas id="eventsByTagChart"></canvas>
+                <canvas id="eventsByTagChart" class="chart-canvas"></canvas>
             </div>
         </section>
         <section>
             <h4>Eventi Verificati</h4>
             <div class="chart-container">
-                <canvas id="verifiedChart"></canvas>
+                <canvas id="verifiedChart" class="chart-canvas"></canvas>
             </div>
         </section>
         <section>
             <h4>Eventi per Ruolo Creatore</h4>
             <div class="chart-container">
-                <canvas id="roleChart"></canvas>
+                <canvas id="roleChart" class="chart-canvas"></canvas>
             </div>
         </section>
     </div>
 </div>
-    <h2>Eventi Privati</h2>
+<h2>Eventi Privati</h2>
 <% if (events.privati.length === 0) { %>
     <p>Nessun evento privato.</p>
 <% } else { %>
@@ -92,7 +92,6 @@
 <% } %>
 
 <h2>Eventi Segnalati</h2>
-
 <% if (reportedEvents.length === 0) { %>
     <p>Nessun evento segnalato.</p>
 <% } else { %>
